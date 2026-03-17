@@ -1,6 +1,8 @@
 # ── Credentials & secrets ─────────────────────────────────────────────────────
 config/credentials_*.json
 config/credentials.json
+.env
+.env.*
 backend/.env
 backend/.env.*
 backend/drivepool.db
