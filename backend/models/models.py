@@ -1,46 +1,77 @@
-from datetime import datetime
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String
-from database import Base
+from dataclasses import dataclass
+from typing import Optional
 
 
-class DriveAccount(Base):
-    __tablename__ = "drive_accounts"
+@dataclass
+class DriveAccount:
+    id: int
+    account_index: int
+    email: Optional[str]
+    refresh_token: Optional[str]
+    access_token: Optional[str]
+    token_expiry: Optional[str]   # stored as ISO-8601 TEXT in D1
+    is_connected: bool
 
-    id = Column(Integer, primary_key=True, index=True)
-    account_index = Column(Integer, unique=True, nullable=False)
-    email = Column(String, nullable=True)
-    refresh_token = Column(String, nullable=True)
-    access_token = Column(String, nullable=True)
-    token_expiry = Column(DateTime, nullable=True)
-    is_connected = Column(Boolean, default=False, nullable=False)
-
-
-class File(Base):
-    __tablename__ = "files"
-
-    id = Column(Integer, primary_key=True, index=True)
-    file_name = Column(String, nullable=False)
-    drive_file_id = Column(String, nullable=False)
-    account_index = Column(Integer, nullable=False)
-    size = Column(BigInteger, default=0)
-    mime_type = Column(String, nullable=True)
-    thumbnail_link = Column(String, nullable=True)
-    parent_drive_file_id = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    @classmethod
+    def from_row(cls, row: dict) -> "DriveAccount":
+        return cls(
+            id=row["id"],
+            account_index=row["account_index"],
+            email=row.get("email"),
+            refresh_token=row.get("refresh_token"),
+            access_token=row.get("access_token"),
+            token_expiry=row.get("token_expiry"),
+            is_connected=bool(row["is_connected"]),
+        )
 
 
-class Profile(Base):
-    __tablename__ = "profile"
+@dataclass
+class File:
+    id: int
+    file_name: str
+    drive_file_id: str
+    account_index: int
+    size: int
+    mime_type: Optional[str]
+    thumbnail_link: Optional[str]
+    parent_drive_file_id: Optional[str]
+    created_at: str   # stored as ISO-8601 TEXT in D1
 
-    id = Column(Integer, primary_key=True)
-    display_name = Column(String, nullable=True)
-    bio = Column(String, nullable=True)
-    avatar_drive_file_id = Column(String, nullable=True)
-    avatar_account_index = Column(Integer, nullable=True)
+    @classmethod
+    def from_row(cls, row: dict) -> "File":
+        return cls(
+            id=row["id"],
+            file_name=row["file_name"],
+            drive_file_id=row["drive_file_id"],
+            account_index=row["account_index"],
+            size=row.get("size") or 0,
+            mime_type=row.get("mime_type"),
+            thumbnail_link=row.get("thumbnail_link"),
+            parent_drive_file_id=row.get("parent_drive_file_id"),
+            created_at=row.get("created_at", ""),
+        )
 
 
-class AppConfig(Base):
-    __tablename__ = "app_config"
+@dataclass
+class Profile:
+    id: int
+    display_name: Optional[str]
+    bio: Optional[str]
+    avatar_drive_file_id: Optional[str]
+    avatar_account_index: Optional[int]
 
-    key = Column(String, primary_key=True)
-    value = Column(String, nullable=False)
+    @classmethod
+    def from_row(cls, row: dict) -> "Profile":
+        return cls(
+            id=row["id"],
+            display_name=row.get("display_name"),
+            bio=row.get("bio"),
+            avatar_drive_file_id=row.get("avatar_drive_file_id"),
+            avatar_account_index=row.get("avatar_account_index"),
+        )
+
+
+@dataclass
+class AppConfig:
+    key: str
+    value: str

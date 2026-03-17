@@ -14,11 +14,11 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
-from sqlalchemy.orm import Session
 
 import config
 from models.models import DriveAccount, File
 from services.auth_service import decrypt_token
+from services.d1_client import D1Client
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 PROFILE_FOLDER_NAME = "_GDriveGenie_"
@@ -97,8 +97,9 @@ def get_storage_quota(account: DriveAccount) -> dict:
         }
 
 
-def get_all_quotas(db: Session) -> list[dict]:
-    accounts = db.query(DriveAccount).filter(DriveAccount.is_connected == True).all()
+async def get_all_quotas(d1: D1Client) -> list[dict]:
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
+    accounts = [DriveAccount.from_row(r) for r in rows]
     results = []
     with ThreadPoolExecutor(max_workers=len(accounts) or 1) as executor:
         futures = {executor.submit(get_storage_quota, acc): acc for acc in accounts}
@@ -107,8 +108,8 @@ def get_all_quotas(db: Session) -> list[dict]:
     return sorted(results, key=lambda x: x["account_index"])
 
 
-def pick_best_account(db: Session) -> Optional[int]:
-    quotas = get_all_quotas(db)
+async def pick_best_account(d1: D1Client) -> Optional[int]:
+    quotas = await get_all_quotas(d1)
     connected = [q for q in quotas if q["is_connected"] and q["free"] > 0]
     if not connected:
         return None
@@ -159,13 +160,7 @@ def download_file(account: DriveAccount, drive_file_id: str) -> bytes:
 
 
 def stream_file(account: DriveAccount, drive_file_id: str):
-    """Yield chunks as they arrive from Google Drive.
-
-    Using a generator means the first bytes reach the client (and any proxy)
-    as soon as the first chunk is ready, instead of waiting for the entire
-    file to be buffered in memory.  This prevents proxy timeouts (ECONNRESET)
-    for large files or slow connections.
-    """
+    """Yield chunks as they arrive from Google Drive."""
     service = build_service(account)
     request = service.files().get_media(fileId=drive_file_id)
     buffer = io.BytesIO()
@@ -309,7 +304,6 @@ def unshare_file(account: DriveAccount, drive_file_id: str) -> None:
 def get_or_create_profile_folder(account: DriveAccount) -> str:
     """Get the GDriveGenie internal folder ID, creating it if needed."""
     service = build_service(account)
-    # Search for existing folder
     query = f"name='{PROFILE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
     result = _retry_on_rate_limit(
         service.files().list(q=query, fields="files(id)").execute
@@ -317,7 +311,6 @@ def get_or_create_profile_folder(account: DriveAccount) -> str:
     existing = result.get("files", [])
     if existing:
         return existing[0]["id"]
-    # Create it
     folder = _retry_on_rate_limit(
         service.files()
         .create(
@@ -369,7 +362,6 @@ def list_shared_files(account: DriveAccount) -> list[dict]:
 def remove_shared_file(account: DriveAccount, drive_file_id: str) -> None:
     service = build_service(account)
 
-    # Step 1: try full delete (succeeds if we are the owner)
     try:
         _retry_on_rate_limit(service.files().delete(fileId=drive_file_id).execute)
         logger.info("remove_shared_file: deleted file %s (owner)", drive_file_id)
@@ -379,7 +371,6 @@ def remove_shared_file(account: DriveAccount, drive_file_id: str) -> None:
         if e.resp.status not in (403, 404):
             raise
 
-    # Step 2: trash it (succeeds for editors who are not the owner)
     try:
         _retry_on_rate_limit(
             service.files().update(fileId=drive_file_id, body={"trashed": True}).execute
@@ -391,8 +382,6 @@ def remove_shared_file(account: DriveAccount, drive_file_id: str) -> None:
         if e.resp.status not in (403,):
             raise
 
-    # Step 3: delete our own permission directly using our permissionId from about().
-    # Bypasses permissions.list which is blocked when the owner restricts visibility.
     try:
         about = _retry_on_rate_limit(service.about().get(fields="user(permissionId)").execute)
         user_perm_id = about["user"]["permissionId"]
@@ -461,44 +450,76 @@ def list_all_files(account: DriveAccount) -> list[dict]:
     return items
 
 
-def sync_files_from_drives(db: Session) -> int:
-    accounts = db.query(DriveAccount).filter(DriveAccount.is_connected == True).all()
+async def sync_files_from_drives(d1: D1Client) -> int:
+    account_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
+    accounts = [DriveAccount.from_row(r) for r in account_rows]
     total = 0
     for account in accounts:
         try:
             drive_files = list_all_files(account)
             drive_ids = {df["id"] for df in drive_files}
 
-            db.query(File).filter(
-                File.account_index == account.account_index,
-                File.drive_file_id.notin_(drive_ids),
-            ).delete(synchronize_session=False)
+            # Delete stale local records that no longer exist on Drive
+            if drive_ids:
+                placeholders = ",".join("?" * len(drive_ids))
+                await d1.execute(
+                    f"DELETE FROM files WHERE account_index = ? AND drive_file_id NOT IN ({placeholders})",
+                    [account.account_index, *drive_ids],
+                )
+            else:
+                await d1.execute(
+                    "DELETE FROM files WHERE account_index = ?",
+                    [account.account_index],
+                )
 
+            # Fetch existing drive_file_ids for this account
+            existing_rows = await d1.execute(
+                "SELECT drive_file_id FROM files WHERE account_index = ?",
+                [account.account_index],
+            )
+            existing_ids = {r["drive_file_id"] for r in existing_rows}
+
+            inserts = []
             for df in drive_files:
                 parent = df.get("parents", [None])[0] if df.get("parents") else None
-                existing = (
-                    db.query(File)
-                    .filter(File.drive_file_id == df["id"], File.account_index == account.account_index)
-                    .first()
-                )
-                if existing:
-                    existing.file_name = df.get("name", existing.file_name)
-                    existing.size = int(df.get("size") or 0)
-                    existing.thumbnail_link = df.get("thumbnailLink")
-                    existing.parent_drive_file_id = parent
+                if df["id"] not in existing_ids:
+                    inserts.append({
+                        "sql": (
+                            "INSERT INTO files "
+                            "(file_name, drive_file_id, account_index, size, mime_type, "
+                            "thumbnail_link, parent_drive_file_id, created_at) "
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        ),
+                        "params": [
+                            df.get("name", ""),
+                            df["id"],
+                            account.account_index,
+                            int(df.get("size") or 0),
+                            df.get("mimeType"),
+                            df.get("thumbnailLink"),
+                            parent,
+                            _parse_drive_time(df.get("createdTime")).isoformat(),
+                        ],
+                    })
                 else:
-                    db.add(File(
-                        file_name=df.get("name", ""),
-                        drive_file_id=df["id"],
-                        account_index=account.account_index,
-                        size=int(df.get("size") or 0),
-                        mime_type=df.get("mimeType"),
-                        thumbnail_link=df.get("thumbnailLink"),
-                        parent_drive_file_id=parent,
-                        created_at=_parse_drive_time(df.get("createdTime")),
-                    ))
+                    await d1.execute(
+                        "UPDATE files SET file_name = ?, size = ?, thumbnail_link = ?, "
+                        "parent_drive_file_id = ? WHERE drive_file_id = ? AND account_index = ?",
+                        [
+                            df.get("name", ""),
+                            int(df.get("size") or 0),
+                            df.get("thumbnailLink"),
+                            parent,
+                            df["id"],
+                            account.account_index,
+                        ],
+                    )
                 total += 1
-            db.commit()
+
+            if inserts:
+                await d1.execute_many(inserts)
+
         except Exception:
-            db.rollback()
+            pass  # per-account isolation
+
     return total

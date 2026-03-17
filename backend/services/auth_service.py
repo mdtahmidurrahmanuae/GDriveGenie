@@ -8,15 +8,18 @@ from jose import JWTError, jwt
 
 import config
 
-_fernet = Fernet(config.ENCRYPTION_KEY.encode())
+
+def _get_fernet() -> Fernet:
+    """Lazy — reads ENCRYPTION_KEY after lifespan has loaded config."""
+    return Fernet(config.ENCRYPTION_KEY.encode())
 
 
 def encrypt_token(token: str) -> str:
-    return _fernet.encrypt(token.encode()).decode()
+    return _get_fernet().encrypt(token.encode()).decode()
 
 
 def decrypt_token(token: str) -> str:
-    return _fernet.decrypt(token.encode()).decode()
+    return _get_fernet().decrypt(token.encode()).decode()
 
 
 def verify_pin(pin: str) -> bool:

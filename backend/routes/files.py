@@ -1,3 +1,4 @@
+import asyncio
 import io
 import logging
 import mimetypes
@@ -7,11 +8,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Up
 logger = logging.getLogger(__name__)
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
-from database import get_db
+from database import get_d1
 from models.models import DriveAccount, File
 from services.auth_service import verify_token
+from services.d1_client import D1Client
 from services.drive_service import (
     delete_drive_file,
     stream_file,
@@ -51,78 +52,102 @@ def _file_to_dict(f: File) -> dict:
         "mime_type": f.mime_type,
         "has_thumbnail": f.thumbnail_link is not None,
         "parent_drive_file_id": f.parent_drive_file_id,
-        "created_at": f.created_at.isoformat(),
+        "created_at": f.created_at,  # already a string from D1
     }
 
 
+async def _get_file_and_account(file_id: int, d1: D1Client):
+    rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
+    if not rows:
+        raise HTTPException(status_code=404, detail="File not found")
+    file = File.from_row(rows[0])
+    acc_rows = await d1.execute(
+        "SELECT * FROM drive_accounts WHERE account_index = ?", [file.account_index]
+    )
+    account = DriveAccount.from_row(acc_rows[0]) if acc_rows else None
+    return file, account
+
+
 @router.post("/sync")
-def sync_files(background_tasks: BackgroundTasks, db: Session = Depends(get_db), _=Depends(verify_token)):
-    background_tasks.add_task(sync_files_from_drives, db)
+async def sync_files(background_tasks: BackgroundTasks, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    async def _sync_bg() -> None:
+        from services.d1_client import D1Client as _D1Client
+        bg_d1 = _D1Client()
+        try:
+            await sync_files_from_drives(bg_d1)
+        finally:
+            await bg_d1.aclose()
+
+    background_tasks.add_task(asyncio.run, _sync_bg())
     return {"ok": True}
 
 
 @router.get("")
-def list_files(db: Session = Depends(get_db), _=Depends(verify_token)):
-    connected_indices = [
-        a.account_index for a in db.query(DriveAccount).filter(DriveAccount.is_connected == True).all()
-    ]
-    files = (
-        db.query(File)
-        .filter(File.account_index.in_(connected_indices))
-        .order_by(File.created_at.desc())
-        .all()
+async def list_files(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    acc_rows = await d1.execute("SELECT account_index FROM drive_accounts WHERE is_connected = 1")
+    connected_indices = [r["account_index"] for r in acc_rows]
+    if not connected_indices:
+        return []
+    placeholders = ",".join("?" * len(connected_indices))
+    file_rows = await d1.execute(
+        f"SELECT * FROM files WHERE account_index IN ({placeholders}) ORDER BY created_at DESC",
+        connected_indices,
     )
-    return [_file_to_dict(f) for f in files]
+    return [_file_to_dict(File.from_row(r)) for r in file_rows]
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload(
     file: UploadFile,
     parent_folder_id: str | None = Form(None),
-    db: Session = Depends(get_db),
+    d1: D1Client = Depends(get_d1),
     _=Depends(verify_token),
 ):
-    best_index = pick_best_account(db)
+    best_index = await pick_best_account(d1)
     if best_index is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="No connected Drive accounts with available space",
         )
 
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == best_index).first()
+    acc_rows = await d1.execute(
+        "SELECT * FROM drive_accounts WHERE account_index = ?", [best_index]
+    )
+    if not acc_rows:
+        raise HTTPException(status_code=503, detail="Account not found")
+    account = DriveAccount.from_row(acc_rows[0])
+
     mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or "application/octet-stream"
     content = await file.read()
     stream = io.BytesIO(content)
 
     result = upload_file(account, stream, file.filename, mime_type, parent_folder_id or None)
 
-    db_file = File(
-        file_name=file.filename,
-        drive_file_id=result["drive_file_id"],
-        account_index=best_index,
-        size=result["size"],
-        mime_type=result["mime_type"],
-        thumbnail_link=result.get("thumbnail_link"),
-        parent_drive_file_id=result.get("parent_drive_file_id"),
+    await d1.execute(
+        "INSERT INTO files (file_name, drive_file_id, account_index, size, mime_type, "
+        "thumbnail_link, parent_drive_file_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+            file.filename,
+            result["drive_file_id"],
+            best_index,
+            result["size"],
+            result["mime_type"],
+            result.get("thumbnail_link"),
+            result.get("parent_drive_file_id"),
+        ],
     )
-    db.add(db_file)
-    db.commit()
-    db.refresh(db_file)
+    id_rows = await d1.execute("SELECT last_insert_rowid() AS id")
+    new_id = id_rows[0]["id"]
 
-    return _file_to_dict(db_file)
-
+    new_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [new_id])
+    return _file_to_dict(File.from_row(new_rows[0]))
 
 
 @router.get("/{file_id}/download")
-def get_download(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token)):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+async def get_download(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    file, account = await _get_file_and_account(file_id, d1)
     if not account or not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
-
     return StreamingResponse(
         stream_file(account, file.drive_file_id),
         media_type=file.mime_type or "application/octet-stream",
@@ -131,15 +156,10 @@ def get_download(file_id: int, db: Session = Depends(get_db), _=Depends(verify_t
 
 
 @router.get("/{file_id}/view")
-def get_view(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token)):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+async def get_view(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    file, account = await _get_file_and_account(file_id, d1)
     if not account or not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
-
     return StreamingResponse(
         stream_file(account, file.drive_file_id),
         media_type=file.mime_type or "application/octet-stream",
@@ -148,58 +168,45 @@ def get_view(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token
 
 
 @router.patch("/{file_id}/rename")
-def rename(
+async def rename(
     file_id: int,
     body: RenameRequest,
-    db: Session = Depends(get_db),
+    d1: D1Client = Depends(get_d1),
     _=Depends(verify_token),
 ):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+    file, account = await _get_file_and_account(file_id, d1)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-
     rename_file(account, file.drive_file_id, body.new_name)
-    file.file_name = body.new_name
-    db.commit()
-
-    return _file_to_dict(file)
+    await d1.execute("UPDATE files SET file_name = ? WHERE id = ?", [body.new_name, file_id])
+    updated_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
+    return _file_to_dict(File.from_row(updated_rows[0]))
 
 
 @router.patch("/{file_id}/move")
-def move_file_route(
+async def move_file_route(
     file_id: int,
     body: MoveRequest,
-    db: Session = Depends(get_db),
+    d1: D1Client = Depends(get_d1),
     _=Depends(verify_token),
 ):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+    file, account = await _get_file_and_account(file_id, d1)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-
     try:
         move_file(account, file.drive_file_id, body.new_parent_drive_file_id, file.parent_drive_file_id)
     except Exception as e:
         logger.exception("move_file failed for file_id=%s", file_id)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
-    file.parent_drive_file_id = None if body.new_parent_drive_file_id == "root" else body.new_parent_drive_file_id
-    db.commit()
-    return _file_to_dict(file)
+    new_parent = None if body.new_parent_drive_file_id == "root" else body.new_parent_drive_file_id
+    await d1.execute("UPDATE files SET parent_drive_file_id = ? WHERE id = ?", [new_parent, file_id])
+    updated_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
+    return _file_to_dict(File.from_row(updated_rows[0]))
 
 
 @router.post("/{file_id}/share")
-def share_file_route(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token)):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+async def share_file_route(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    file, account = await _get_file_and_account(file_id, d1)
     if not account or not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
@@ -211,11 +218,8 @@ def share_file_route(file_id: int, db: Session = Depends(get_db), _=Depends(veri
 
 
 @router.delete("/{file_id}/share", status_code=status.HTTP_204_NO_CONTENT)
-def unshare_file_route(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token)):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+async def unshare_file_route(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    file, account = await _get_file_and_account(file_id, d1)
     if not account or not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
@@ -226,26 +230,23 @@ def unshare_file_route(file_id: int, db: Session = Depends(get_db), _=Depends(ve
 
 
 @router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_file(file_id: int, db: Session = Depends(get_db), _=Depends(verify_token)):
-    file = db.query(File).filter(File.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == file.account_index).first()
+async def delete_file(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    file, account = await _get_file_and_account(file_id, d1)
     if account and account.is_connected:
         try:
             trash_drive_file(account, file.drive_file_id)
         except Exception:
             pass
-
-    db.delete(file)
-    db.commit()
+    await d1.execute("DELETE FROM files WHERE id = ?", [file_id])
 
 
 @router.get("/shared/{account_index}/{drive_file_id}/download")
-def download_shared_file(account_index: int, drive_file_id: str, db: Session = Depends(get_db), _=Depends(verify_token)):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account or not account.is_connected:
+async def download_shared_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
+    if not rows:
+        raise HTTPException(status_code=503, detail="Account not connected")
+    account = DriveAccount.from_row(rows[0])
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     return StreamingResponse(
         stream_file(account, drive_file_id),
@@ -255,9 +256,12 @@ def download_shared_file(account_index: int, drive_file_id: str, db: Session = D
 
 
 @router.get("/shared/{account_index}/{folder_id}/children")
-def list_shared_children(account_index: int, folder_id: str, db: Session = Depends(get_db), _=Depends(verify_token)):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account or not account.is_connected:
+async def list_shared_children(account_index: int, folder_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
+    if not rows:
+        raise HTTPException(status_code=503, detail="Account not connected")
+    account = DriveAccount.from_row(rows[0])
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         return list_shared_folder_children(account, folder_id)
@@ -266,9 +270,12 @@ def list_shared_children(account_index: int, folder_id: str, db: Session = Depen
 
 
 @router.delete("/shared/{account_index}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_shared_file(account_index: int, drive_file_id: str, db: Session = Depends(get_db), _=Depends(verify_token)):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account or not account.is_connected:
+async def delete_shared_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
+    if not rows:
+        raise HTTPException(status_code=503, detail="Account not connected")
+    account = DriveAccount.from_row(rows[0])
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         remove_shared_file(account, drive_file_id)
@@ -279,8 +286,9 @@ def delete_shared_file(account_index: int, drive_file_id: str, db: Session = Dep
 
 
 @router.get("/shared")
-def list_shared(db: Session = Depends(get_db), _=Depends(verify_token)):
-    accounts = db.query(DriveAccount).filter(DriveAccount.is_connected == True).all()
+async def list_shared(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    acc_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
+    accounts = [DriveAccount.from_row(r) for r in acc_rows]
     results = []
     for account in accounts:
         try:
@@ -291,8 +299,9 @@ def list_shared(db: Session = Depends(get_db), _=Depends(verify_token)):
 
 
 @router.get("/trash")
-def list_trash(db: Session = Depends(get_db), _=Depends(verify_token)):
-    accounts = db.query(DriveAccount).filter(DriveAccount.is_connected == True).all()
+async def list_trash(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    acc_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
+    accounts = [DriveAccount.from_row(r) for r in acc_rows]
     results = []
     for account in accounts:
         try:
@@ -303,9 +312,12 @@ def list_trash(db: Session = Depends(get_db), _=Depends(verify_token)):
 
 
 @router.post("/trash/{account_index}/{drive_file_id}/restore", status_code=status.HTTP_204_NO_CONTENT)
-def restore_trash_file(account_index: int, drive_file_id: str, db: Session = Depends(get_db), _=Depends(verify_token)):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account or not account.is_connected:
+async def restore_trash_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
+    if not rows:
+        raise HTTPException(status_code=503, detail="Account not connected")
+    account = DriveAccount.from_row(rows[0])
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         restore_file(account, drive_file_id)
@@ -314,9 +326,12 @@ def restore_trash_file(account_index: int, drive_file_id: str, db: Session = Dep
 
 
 @router.delete("/trash/{account_index}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_trash_file(account_index: int, drive_file_id: str, db: Session = Depends(get_db), _=Depends(verify_token)):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account or not account.is_connected:
+async def delete_trash_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
+    if not rows:
+        raise HTTPException(status_code=503, detail="Account not connected")
+    account = DriveAccount.from_row(rows[0])
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         delete_drive_file(account, drive_file_id)

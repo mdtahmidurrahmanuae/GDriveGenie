@@ -1,17 +1,18 @@
+import asyncio
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from googleapiclient.discovery import build as gbuild
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 import config
-from database import get_db
-from models.models import DriveAccount
+from database import get_d1
 from services.auth_service import (
     create_access_token,
     encrypt_token,
     verify_pin,
     verify_token,
 )
+from services.d1_client import D1Client
 from services.drive_service import get_oauth_flow, sync_files_from_drives
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -45,24 +46,23 @@ def logout(response: Response):
 
 
 @router.get("/oauth/new")
-def get_new_oauth_url(
-    db: Session = Depends(get_db),
+async def get_new_oauth_url(
+    d1: D1Client = Depends(get_d1),
     _=Depends(verify_token),
 ):
-    # Remove any leftover email-less disconnected placeholders from previous attempts
-    db.query(DriveAccount).filter(
-        DriveAccount.is_connected == False,
-        DriveAccount.email == None,
-        DriveAccount.refresh_token == None,
-    ).delete()
-    db.commit()
+    # Remove orphaned email-less disconnected placeholders from previous attempts
+    await d1.execute(
+        "DELETE FROM drive_accounts WHERE is_connected = 0 AND email IS NULL AND refresh_token IS NULL"
+    )
 
-    max_account = db.query(DriveAccount).order_by(DriveAccount.account_index.desc()).first()
-    new_index = (max_account.account_index + 1) if max_account else 1
+    rows = await d1.execute("SELECT MAX(account_index) AS max_idx FROM drive_accounts")
+    max_idx = rows[0]["max_idx"] if rows and rows[0]["max_idx"] is not None else 0
+    new_index = max_idx + 1
 
-    placeholder = DriveAccount(account_index=new_index, is_connected=False)
-    db.add(placeholder)
-    db.commit()
+    await d1.execute(
+        "INSERT INTO drive_accounts (account_index, is_connected) VALUES (?, 0)",
+        [new_index],
+    )
 
     redirect_uri = config.BACKEND_URL.rstrip("/") + "/api/auth/callback"
     flow = get_oauth_flow(redirect_uri)
@@ -93,12 +93,12 @@ def get_oauth_url(account_index: int, _=Depends(verify_token)):
 
 
 @router.get("/callback")
-def oauth_callback(
+async def oauth_callback(
     code: str,
     state: str,
     request: Request,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
+    d1: D1Client = Depends(get_d1),
 ):
     account_index = int(state)
     redirect_uri = config.BACKEND_URL.rstrip("/") + "/api/auth/callback"
@@ -113,17 +113,29 @@ def oauth_callback(
     about = service.about().get(fields="user").execute()
     email = about.get("user", {}).get("emailAddress", "")
 
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if not account:
-        account = DriveAccount(account_index=account_index)
-        db.add(account)
+    rows = await d1.execute(
+        "SELECT id FROM drive_accounts WHERE account_index = ?", [account_index]
+    )
+    if rows:
+        await d1.execute(
+            "UPDATE drive_accounts SET email = ?, refresh_token = ?, is_connected = 1 WHERE account_index = ?",
+            [email, encrypt_token(creds.refresh_token), account_index],
+        )
+    else:
+        await d1.execute(
+            "INSERT INTO drive_accounts (account_index, email, refresh_token, is_connected) VALUES (?, ?, ?, 1)",
+            [account_index, email, encrypt_token(creds.refresh_token)],
+        )
 
-    account.email = email
-    account.refresh_token = encrypt_token(creds.refresh_token)
-    account.is_connected = True
-    db.commit()
+    async def _sync_bg() -> None:
+        from services.d1_client import D1Client as _D1Client
+        bg_d1 = _D1Client()
+        try:
+            await sync_files_from_drives(bg_d1)
+        finally:
+            await bg_d1.aclose()
 
-    background_tasks.add_task(sync_files_from_drives, db)
+    background_tasks.add_task(asyncio.run, _sync_bg())
 
     return Response(
         status_code=302,

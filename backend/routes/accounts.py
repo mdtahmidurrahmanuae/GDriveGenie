@@ -1,24 +1,21 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from database import get_db
-from models.models import DriveAccount, File
+from database import get_d1
+from models.models import DriveAccount
 from services.auth_service import verify_token
+from services.d1_client import D1Client
 from services.drive_service import get_all_quotas
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
 @router.get("")
-def list_accounts(db: Session = Depends(get_db), _=Depends(verify_token)):
-    quotas = get_all_quotas(db)
+async def list_accounts(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
+    quotas = await get_all_quotas(d1)
     connected_indices = {q["account_index"] for q in quotas}
 
-    disconnected = (
-        db.query(DriveAccount)
-        .filter(DriveAccount.is_connected == False)
-        .all()
-    )
+    rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 0")
+    disconnected = [DriveAccount.from_row(r) for r in rows]
 
     for acc in disconnected:
         if acc.account_index not in connected_indices:
@@ -35,17 +32,15 @@ def list_accounts(db: Session = Depends(get_db), _=Depends(verify_token)):
 
 
 @router.delete("/{account_index}")
-def disconnect_account(
+async def disconnect_account(
     account_index: int,
-    db: Session = Depends(get_db),
+    d1: D1Client = Depends(get_d1),
     _=Depends(verify_token),
 ):
-    account = db.query(DriveAccount).filter(DriveAccount.account_index == account_index).first()
-    if account:
-        db.query(File).filter(File.account_index == account_index).delete()
-        account.is_connected = False
-        account.refresh_token = None
-        account.access_token = None
-        account.token_expiry = None
-        db.commit()
+    await d1.execute("DELETE FROM files WHERE account_index = ?", [account_index])
+    await d1.execute(
+        "UPDATE drive_accounts SET is_connected = 0, refresh_token = NULL, "
+        "access_token = NULL, token_expiry = NULL WHERE account_index = ?",
+        [account_index],
+    )
     return {"ok": True}

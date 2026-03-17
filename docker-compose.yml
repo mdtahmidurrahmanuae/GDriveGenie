@@ -10,17 +10,16 @@ services:
       # Allow browser requests from the frontend origin
       FRONTEND_URL: http://localhost:3000
       # Public URL the browser can reach — used to build the OAuth callback URI
-      # (request.base_url inside Docker would resolve to the internal service name)
       BACKEND_URL: http://localhost:8000
-      # Persist the database in a named volume instead of inside the container
-      DB_PATH: /app/data/gdriveGenie.db
       # Point config.py at the bind-mounted credentials directory
       CONFIG_DIR: /app/config
+      # Cloudflare D1 credentials — set these in a .env file or host environment
+      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
+      CF_D1_DATABASE_ID: ${CF_D1_DATABASE_ID}
+      CF_API_TOKEN: ${CF_API_TOKEN}
     volumes:
       # Google OAuth credentials — place credentials.json here before starting
       - ./config:/app/config:ro
-      # SQLite database survives container restarts and image rebuilds
-      - gdriveGenie_data:/app/data
     restart: unless-stopped
 
   frontend:
@@ -35,7 +34,3 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-  # Named volume — persists gdriveGenie.db across rebuilds
-  gdriveGenie_data:
