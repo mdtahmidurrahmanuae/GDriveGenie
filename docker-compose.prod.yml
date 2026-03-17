@@ -1,0 +1,38 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      FRONTEND_URL: http://${SERVER_IP}
+      BACKEND_URL: http://${SERVER_IP}
+      CONFIG_DIR: /app/config
+      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
+      CF_D1_DATABASE_ID: ${CF_D1_DATABASE_ID}
+      CF_API_TOKEN: ${CF_API_TOKEN}
+    volumes:
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked in at build time — Next.js server-side rewrites use the Docker
+        # internal network name to reach the backend container
+        NEXT_PUBLIC_API_URL: http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+    restart: unless-stopped

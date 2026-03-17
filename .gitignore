@@ -3,6 +3,7 @@ config/credentials_*.json
 config/credentials.json
 .env
 .env.*
+!.env.example
 backend/.env
 backend/.env.*
 backend/drivepool.db
