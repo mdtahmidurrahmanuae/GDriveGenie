@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="heroBg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#09090f"/>
+      <stop offset="100%" stop-color="#0f0a1e"/>
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#heroBg)"/>
+
+  <!-- Dot grid pattern -->
+  <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="rgba(139,92,246,0.13)"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Ambient glow orbs -->
+  <ellipse cx="600" cy="200" rx="400" ry="300" fill="url(#glow1)"/>
+  <ellipse cx="900" cy="450" rx="300" ry="250" fill="url(#glow2)"/>
+  <ellipse cx="200" cy="500" rx="250" ry="200" fill="url(#glow2)"/>
+
+  <!-- Top border line -->
+  <rect x="0" y="0" width="1200" height="4" fill="url(#logoGrad)" rx="0" opacity="0.8"/>
+
+  <!-- Logo mark -->
+  <rect x="100" y="215" width="72" height="72" rx="16" fill="url(#logoGrad)"/>
+  <rect x="100" y="215" width="72" height="36" rx="16" fill="rgba(255,255,255,0.12)"/>
+  <!-- Cloud icon in logo -->
+  <path d="M110 272a10 10 0 01-2.7-19.7 12.8 12.8 0 0124.8-4.6 7.1 7.1 0 019.1 9.4 9.3 9.3 0 018.3 9.9H110z"
+        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,255,255,0.12)"/>
+  <!-- Sparkle in logo -->
+  <path d="M163 222l1.4 4.2 4.2 1.4-4.2 1.4-1.4 4.2-1.4-4.2-4.2-1.4 4.2-1.4z" fill="white" opacity="0.9"/>
+
+  <!-- App name -->
+  <text x="192" y="265" font-family="Inter, system-ui, sans-serif" font-size="52" font-weight="700" fill="#ededff">GDriveGenie</text>
+
+  <!-- Headline -->
+  <text x="100" y="345" font-family="Inter, system-ui, sans-serif" font-size="68" font-weight="800" fill="#ededff">Your Storage,</text>
+  <text x="100" y="425" font-family="Inter, system-ui, sans-serif" font-size="68" font-weight="800" fill="url(#textGrad)">Multiplied.</text>
+
+  <!-- Subtitle -->
+  <text x="100" y="488" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#8888aa">Aggregate unlimited Google Drive accounts into one</text>
+  <text x="100" y="522" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#8888aa">unified dashboard. Free, open source, self-hosted.</text>
+
+  <!-- Right side: stat cards -->
+  <!-- Card 1 -->
+  <rect x="780" y="180" width="200" height="90" rx="14" fill="#0f0f1a" stroke="#252538" stroke-width="1.5"/>
+  <text x="800" y="210" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#8888aa">Free per account</text>
+  <text x="800" y="248" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="700" fill="#ededff">15 GB</text>
+
+  <!-- Card 2 -->
+  <rect x="1000" y="180" width="180" height="90" rx="14" fill="#0f0f1a" stroke="#252538" stroke-width="1.5"/>
+  <text x="1020" y="210" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#8888aa">Max accounts</text>
+  <text x="1020" y="248" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="700" fill="#ededff">∞</text>
+
+  <!-- Card 3 -->
+  <rect x="780" y="290" width="200" height="90" rx="14" fill="#0f0f1a" stroke="#252538" stroke-width="1.5"/>
+  <text x="800" y="320" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#8888aa">Cost</text>
+  <text x="800" y="358" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="700" fill="#a78bfa">$0</text>
+
+  <!-- Card 4 -->
+  <rect x="1000" y="290" width="180" height="90" rx="14" fill="#0f0f1a" stroke="#252538" stroke-width="1.5"/>
+  <text x="1020" y="320" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#8888aa">Data shared</text>
+  <text x="1020" y="358" font-family="Inter, system-ui, sans-serif" font-size="36" font-weight="700" fill="#34d399">Never</text>
+
+  <!-- Google Drive icons row -->
+  <rect x="780" y="410" width="48" height="48" rx="10" fill="#161622" stroke="#252538" stroke-width="1"/>
+  <path d="M796 430h16l8 14-4 7h-24l-4-7zm16 0l8 14m-24-14l-8 14" stroke="#4285F4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="840" y="410" width="48" height="48" rx="10" fill="#161622" stroke="#252538" stroke-width="1"/>
+  <path d="M856 430h16l8 14-4 7h-24l-4-7zm16 0l8 14m-24-14l-8 14" stroke="#34A853" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="900" y="410" width="48" height="48" rx="10" fill="#161622" stroke="#252538" stroke-width="1"/>
+  <path d="M916 430h16l8 14-4 7h-24l-4-7zm16 0l8 14m-24-14l-8 14" stroke="#FBBC04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Arrow -->
+  <path d="M966 434l12 0M972 430l6 4-6 4" stroke="#55556f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- GDG icon -->
+  <rect x="992" y="410" width="48" height="48" rx="10" fill="rgba(124,58,237,0.15)" stroke="rgba(124,58,237,0.4)" stroke-width="1.5"/>
+  <path d="M1002 445a8 8 0 01-2-15.5 9 9 0 0117.5-3.2 5 5 0 016.4 6.6A6.5 6.5 0 011038 445H1002z"
+        stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Bottom border -->
+  <rect x="0" y="626" width="1200" height="4" fill="#252538" rx="0"/>
+  <text x="100" y="617" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#55556f">github.com/saimon4u/GDriveGenie</text>
+  <text x="1100" y="617" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#55556f" text-anchor="end">Open Source</text>
+</svg>
