@@ -1,34 +1,23 @@
+# fly.toml app configuration file generated for gdrivegenie-api on 2026-03-17T15:50:02Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'gdrivegenie-api'
-primary_region = 'iad'
+primary_region = 'ams'
 
 [build]
-  dockerfile = 'Dockerfile'
 
-[env]
-  CONFIG_DIR = '/app/config'
-
-[[services]]
+[http_service]
   internal_port = 8000
-  protocol      = 'tcp'
-  auto_stop_machines  = true
+  force_https = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
+  processes = ['app']
 
-  [[services.ports]]
-    handlers    = ['http']
-    port        = 80
-    force_https = true
-
-  [[services.ports]]
-    handlers = ['tls', 'http']
-    port     = 443
-
-  [services.concurrency]
-    type       = 'connections'
-    hard_limit = 25
-    soft_limit = 20
-
-[[mounts]]
-  source       = 'gdrivegenie_config'
-  destination  = '/app/config'
-  initial_size = '1gb'
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
