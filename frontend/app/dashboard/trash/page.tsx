@@ -134,7 +134,7 @@ export default function TrashPage() {
         <button
           onClick={() => handleRestore(file)}
           disabled={busy}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-s2 hover:text-green-400 disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-s2 hover:text-green-400 disabled:opacity-40"
           title="Restore"
         >
           {isRestoring ? (
@@ -150,7 +150,7 @@ export default function TrashPage() {
         <button
           onClick={() => handleDelete(file)}
           disabled={busy}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-s2 hover:text-red-400 disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-s2 hover:text-red-400 disabled:opacity-40"
           title="Delete permanently"
         >
           {isDeleting ? (
@@ -172,15 +172,15 @@ export default function TrashPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-dp-text">Trash</h1>
-          <p className="mt-1 text-sm text-dp-text2">
+          <h1 className="text-xl font-semibold text-gg-text">Trash</h1>
+          <p className="mt-1 text-sm text-gg-text2">
             {loading ? "Loading…" : `${filtered.length} ${filtered.length === 1 ? "item" : "items"}`}
           </p>
         </div>
         <button
           onClick={fetchTrash}
           disabled={loading}
-          className="flex items-center gap-1.5 rounded-lg border border-dp-border bg-dp-s1 px-3 py-2 text-xs text-dp-text2 transition hover:border-orange-500/30 hover:text-orange-400 disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-lg border border-gg-border bg-gg-s1 px-3 py-2 text-xs text-gg-text2 transition hover:border-violet-500/30 hover:text-violet-400 disabled:opacity-40"
         >
           <svg className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -192,31 +192,31 @@ export default function TrashPage() {
       {/* Toolbar */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search trash…"
-            className="w-full rounded-lg border border-dp-border bg-dp-s1 py-2 pl-8 pr-3 text-xs text-dp-text placeholder-dp-text3 outline-none focus:border-orange-500/50"
+            className="w-full rounded-lg border border-gg-border bg-gg-s1 py-2 pl-8 pr-3 text-xs text-gg-text placeholder-gg-text3 outline-none focus:border-violet-500/50"
           />
         </div>
 
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortKey)}
-          className="rounded-lg border border-dp-border bg-dp-s1 py-2 pl-3 pr-7 text-xs text-dp-text2 outline-none focus:border-orange-500/50"
+          className="rounded-lg border border-gg-border bg-gg-s1 py-2 pl-3 pr-7 text-xs text-gg-text2 outline-none focus:border-violet-500/50"
         >
           <option value="date">Date trashed</option>
           <option value="name">Name</option>
           <option value="size">Size</option>
         </select>
 
-        <div className="flex rounded-lg border border-dp-border bg-dp-s1 p-0.5">
+        <div className="flex rounded-lg border border-gg-border bg-gg-s1 p-0.5">
           <button
             onClick={() => setView("grid")}
-            className={`flex h-7 w-7 items-center justify-center rounded-md transition ${view === "grid" ? "bg-dp-s2 text-dp-text" : "text-dp-text3 hover:text-dp-text"}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-md transition ${view === "grid" ? "bg-gg-s2 text-gg-text" : "text-gg-text3 hover:text-gg-text"}`}
             title="Grid view"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -225,7 +225,7 @@ export default function TrashPage() {
           </button>
           <button
             onClick={() => setView("list")}
-            className={`flex h-7 w-7 items-center justify-center rounded-md transition ${view === "list" ? "bg-dp-s2 text-dp-text" : "text-dp-text3 hover:text-dp-text"}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-md transition ${view === "list" ? "bg-gg-s2 text-gg-text" : "text-gg-text3 hover:text-gg-text"}`}
             title="List view"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -237,33 +237,33 @@ export default function TrashPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <svg className="h-6 w-6 animate-spin text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-6 w-6 animate-spin text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dp-border bg-dp-s1 py-20 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-dp-border bg-dp-bg">
-            <svg className="h-6 w-6 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-gg-border bg-gg-s1 py-20 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-gg-border bg-gg-bg">
+            <svg className="h-6 w-6 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
             </svg>
           </div>
-          <p className="text-sm text-dp-text3">{search ? "No files match your search." : "Trash is empty."}</p>
+          <p className="text-sm text-gg-text3">{search ? "No files match your search." : "Trash is empty."}</p>
         </div>
       ) : view === "grid" ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {filtered.map((file) => {
             const key = `${file.account_index}-${file.drive_file_id}`;
             return (
-              <div key={key} className="group relative flex flex-col items-center gap-2 rounded-xl border border-dp-border bg-dp-s1 p-3 opacity-75 transition hover:border-orange-500/20 hover:bg-dp-hover hover:opacity-100">
-                <span className="absolute right-2 top-2 rounded-full border border-dp-border bg-dp-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-dp-text3">
+              <div key={key} className="group relative flex flex-col items-center gap-2 rounded-xl border border-gg-border bg-gg-s1 p-3 opacity-75 transition hover:border-violet-500/20 hover:bg-gg-hover hover:opacity-100">
+                <span className="absolute right-2 top-2 rounded-full border border-gg-border bg-gg-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-gg-text3">
                   #{file.account_index}
                 </span>
                 <div className="mt-2"><FileTypeIcon mimeType={file.mime_type} size={40} /></div>
-                <span className="line-clamp-2 w-full text-center text-[11px] text-dp-text" title={file.file_name}>
+                <span className="line-clamp-2 w-full text-center text-[11px] text-gg-text" title={file.file_name}>
                   {file.file_name}
                 </span>
-                <span className="text-[10px] text-dp-text3">
+                <span className="text-[10px] text-gg-text3">
                   {file.trashed_at ? new Date(file.trashed_at).toLocaleDateString() : "—"}
                 </span>
                 <div className="mt-auto flex w-full items-center justify-center gap-1 opacity-0 transition group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
@@ -274,33 +274,33 @@ export default function TrashPage() {
           })}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-dp-border bg-dp-s1">
+        <div className="overflow-hidden rounded-xl border border-gg-border bg-gg-s1">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-dp-border">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3">Name</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 sm:table-cell">Size</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 md:table-cell">Account</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 md:table-cell">Trashed</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3">Actions</th>
+              <tr className="border-b border-gg-border">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3">Name</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 sm:table-cell">Size</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 md:table-cell">Account</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 md:table-cell">Trashed</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((file) => {
                 const key = `${file.account_index}-${file.drive_file_id}`;
                 return (
-                  <tr key={key} className="border-b border-dp-border last:border-0 hover:bg-dp-hover">
+                  <tr key={key} className="border-b border-gg-border last:border-0 hover:bg-gg-hover">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <FileTypeIcon mimeType={file.mime_type} size={24} />
-                        <span className="text-sm text-dp-text" title={file.file_name}>{file.file_name}</span>
+                        <span className="text-sm text-gg-text" title={file.file_name}>{file.file_name}</span>
                       </div>
                     </td>
-                    <td className="hidden px-4 py-3 text-sm text-dp-text3 sm:table-cell">{formatBytes(file.size)}</td>
+                    <td className="hidden px-4 py-3 text-sm text-gg-text3 sm:table-cell">{formatBytes(file.size)}</td>
                     <td className="hidden px-4 py-3 md:table-cell">
-                      <span className="rounded-md border border-dp-border px-2 py-0.5 text-xs text-dp-text3">#{file.account_index}</span>
+                      <span className="rounded-md border border-gg-border px-2 py-0.5 text-xs text-gg-text3">#{file.account_index}</span>
                     </td>
-                    <td className="hidden px-4 py-3 text-sm text-dp-text3 md:table-cell">
+                    <td className="hidden px-4 py-3 text-sm text-gg-text3 md:table-cell">
                       {file.trashed_at ? new Date(file.trashed_at).toLocaleDateString() : "—"}
                     </td>
                     <td className="px-4 py-3">

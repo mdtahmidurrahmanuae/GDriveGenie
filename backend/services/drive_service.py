@@ -21,7 +21,7 @@ from models.models import DriveAccount, File
 from services.auth_service import decrypt_token
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-PROFILE_FOLDER_NAME = "_DrivePool_"
+PROFILE_FOLDER_NAME = "_GDriveGenie_"
 CREDENTIALS_PATH = os.path.join(config.CONFIG_DIR, "credentials.json")
 
 
@@ -307,7 +307,7 @@ def unshare_file(account: DriveAccount, drive_file_id: str) -> None:
 
 
 def get_or_create_profile_folder(account: DriveAccount) -> str:
-    """Get the DrivePool internal folder ID, creating it if needed."""
+    """Get the GDriveGenie internal folder ID, creating it if needed."""
     service = build_service(account)
     # Search for existing folder
     query = f"name='{PROFILE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false"

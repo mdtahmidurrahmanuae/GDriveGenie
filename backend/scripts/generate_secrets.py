@@ -14,7 +14,7 @@ import bcrypt
 from cryptography.fernet import Fernet
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.getenv("DB_PATH", os.path.join(BACKEND_DIR, "drivepool.db"))
+DB_PATH = os.getenv("DB_PATH", os.path.join(BACKEND_DIR, "gdriveGenie.db"))
 
 
 def setup_table(conn: sqlite3.Connection) -> None:

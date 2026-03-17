@@ -13,14 +13,14 @@ services:
       # (request.base_url inside Docker would resolve to the internal service name)
       BACKEND_URL: http://localhost:8000
       # Persist the database in a named volume instead of inside the container
-      DB_PATH: /app/data/drivepool.db
+      DB_PATH: /app/data/gdriveGenie.db
       # Point config.py at the bind-mounted credentials directory
       CONFIG_DIR: /app/config
     volumes:
       # Google OAuth credentials — place credentials.json here before starting
       - ./config:/app/config:ro
       # SQLite database survives container restarts and image rebuilds
-      - drivepool_data:/app/data
+      - gdriveGenie_data:/app/data
     restart: unless-stopped
 
   frontend:
@@ -37,5 +37,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  # Named volume — persists drivepool.db across rebuilds
-  drivepool_data:
+  # Named volume — persists gdriveGenie.db across rebuilds
+  gdriveGenie_data:

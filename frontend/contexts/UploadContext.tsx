@@ -152,16 +152,16 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
       {/* Drag-to-upload overlay */}
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-dp-bg/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-orange-500/60 bg-dp-s1/80 px-16 py-12">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/10">
-              <svg className="h-8 w-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-gg-bg/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-violet-500/60 bg-gg-s1/80 px-16 py-12">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-500/20 bg-violet-600/10">
+              <svg className="h-8 w-8 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-lg font-semibold text-dp-text">Drop to upload</p>
-              <p className="mt-1 text-sm text-dp-text2">Files will be uploaded to your Drive pool</p>
+              <p className="text-lg font-semibold text-gg-text">Drop to upload</p>
+              <p className="mt-1 text-sm text-gg-text2">Files will be uploaded to your Drive pool</p>
             </div>
           </div>
         </div>
@@ -174,17 +174,17 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
           onClick={() => setConfirmState(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-dp-border bg-dp-s1 p-6 shadow-2xl"
+            className="w-full max-w-sm rounded-2xl border border-gg-border bg-gg-s1 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm font-semibold text-dp-text">{confirmState.message}</p>
+            <p className="text-sm font-semibold text-gg-text">{confirmState.message}</p>
             {confirmState.description && (
-              <p className="mt-1.5 text-xs text-dp-text3">{confirmState.description}</p>
+              <p className="mt-1.5 text-xs text-gg-text3">{confirmState.description}</p>
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setConfirmState(null)}
-                className="rounded-lg border border-dp-border px-4 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover"
+                className="rounded-lg border border-gg-border px-4 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover"
               >
                 Cancel
               </button>
@@ -193,7 +193,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
                 className={`rounded-lg px-4 py-2 text-xs font-medium transition ${
                   confirmState.danger
                     ? "bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"
-                    : "bg-orange-500 text-white hover:bg-orange-400"
+                    : "bg-violet-600 text-white hover:bg-violet-500"
                 }`}
               >
                 {confirmState.confirmLabel}
@@ -210,14 +210,14 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             className={`flex items-center gap-3 rounded-xl border px-4 py-3 shadow-xl ${
               t.type === "success"
-                ? "border-emerald-500/30 bg-dp-s1"
+                ? "border-emerald-500/30 bg-gg-s1"
                 : t.type === "error"
-                ? "border-red-500/30 bg-dp-s1"
-                : "border-dp-border bg-dp-s1"
+                ? "border-red-500/30 bg-gg-s1"
+                : "border-gg-border bg-gg-s1"
             }`}
           >
             {t.type === "loading" ? (
-              <div className="h-5 w-5 flex-shrink-0 animate-spin rounded-full border-2 border-dp-border border-t-orange-500" />
+              <div className="h-5 w-5 flex-shrink-0 animate-spin rounded-full border-2 border-gg-border border-t-violet-500" />
             ) : t.type === "success" ? (
               <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
                 <svg className="h-3 w-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -231,17 +231,17 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
                 </svg>
               </div>
             )}
-            <p className="text-xs font-medium text-dp-text">{t.message}</p>
+            <p className="text-xs font-medium text-gg-text">{t.message}</p>
           </div>
         ))}
 
         {snacks.map((snack) => (
           <div
             key={snack.id}
-            className="flex items-center gap-3 rounded-xl border border-dp-border bg-dp-s1 px-4 py-3 shadow-xl"
+            className="flex items-center gap-3 rounded-xl border border-gg-border bg-gg-s1 px-4 py-3 shadow-xl"
           >
             {snack.status === "uploading" ? (
-              <div className="h-5 w-5 flex-shrink-0 animate-spin rounded-full border-2 border-dp-border border-t-orange-500" />
+              <div className="h-5 w-5 flex-shrink-0 animate-spin rounded-full border-2 border-gg-border border-t-violet-500" />
             ) : snack.status === "done" ? (
               <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
                 <svg className="h-3 w-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -256,16 +256,16 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-dp-text">{snack.name}</p>
+              <p className="truncate text-xs font-medium text-gg-text">{snack.name}</p>
               {snack.status === "uploading" ? (
-                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-dp-border">
+                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gg-border">
                   <div
-                    className="h-full rounded-full bg-orange-500 transition-all duration-300"
+                    className="h-full rounded-full bg-violet-600 transition-all duration-300"
                     style={{ width: `${snack.progress}%` }}
                   />
                 </div>
               ) : (
-                <p className="mt-0.5 text-[10px] text-dp-text3">
+                <p className="mt-0.5 text-[10px] text-gg-text3">
                   {snack.status === "done" ? "Upload complete" : "Upload failed"}
                 </p>
               )}

@@ -66,10 +66,10 @@ export default function UploadZone({ onUploadComplete }: { onUploadComplete: () 
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       onClick={() => progress === null && inputRef.current?.click()}
-      className={`relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+      className={`relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all ${
         dragging
-          ? "border-orange-500/60 bg-orange-500/5"
-          : "border-[#21212b] hover:border-[#2e2e3d] hover:bg-[#18181e]"
+          ? "border-violet-500/60 bg-violet-600/5 shadow-lg shadow-violet-600/5"
+          : "border-gg-border hover:border-violet-500/30 hover:bg-gg-hover"
       }`}
     >
       <input
@@ -81,31 +81,31 @@ export default function UploadZone({ onUploadComplete }: { onUploadComplete: () 
 
       {progress !== null ? (
         <div className="space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10">
-            <svg className="h-6 w-6 animate-pulse text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600/10">
+            <svg className="h-6 w-6 animate-pulse text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
           </div>
-          <p className="text-sm text-[#8888a4]">Uploading… <span className="font-medium text-white">{progress}%</span></p>
-          <div className="mx-auto h-1.5 w-48 overflow-hidden rounded-full bg-[#21212b]">
+          <p className="text-sm text-gg-text2">Uploading… <span className="font-medium text-gg-text">{progress}%</span></p>
+          <div className="mx-auto h-1.5 w-48 overflow-hidden rounded-full bg-gg-border">
             <div
-              className="h-full rounded-full bg-orange-500 transition-all duration-200"
+              className="h-full rounded-full bg-violet-600 transition-all duration-200"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-[#21212b] bg-[#1a1a21]">
-            <svg className="h-6 w-6 text-[#555568]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-gg-border bg-gg-s2">
+            <svg className="h-6 w-6 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
           </div>
           <div>
-            <p className="text-sm text-[#8888a4]">
-              Drag & drop or <span className="font-medium text-orange-400">browse</span>
+            <p className="text-sm text-gg-text2">
+              Drag & drop or <span className="font-medium text-violet-400">browse</span>
             </p>
-            <p className="mt-1 text-xs text-[#555568]">Routed to the account with most free space</p>
+            <p className="mt-1 text-xs text-gg-text3">Routed to the account with most free space</p>
           </div>
         </div>
       )}

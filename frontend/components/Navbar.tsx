@@ -62,11 +62,11 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
 
   return (
     <>
-      <header className="flex h-12 flex-none items-center justify-between border-b border-dp-border bg-dp-sidebar px-4">
+      <header className="flex h-12 flex-none items-center justify-between border-b border-gg-border/60 bg-gg-sidebar/80 px-4 backdrop-blur-md">
         {/* Hamburger — mobile only */}
         <button
           onClick={onMenuOpen}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text lg:hidden"
           title="Open menu"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -78,7 +78,7 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
         <div className="ml-auto flex items-center gap-1">
         <button
           onClick={toggle}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text"
           title="Toggle theme"
         >
           {theme === "dark" ? (
@@ -92,14 +92,14 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
           )}
         </button>
 
-        <div className="h-4 w-px bg-dp-border mx-1" />
+        <div className="h-4 w-px bg-gg-border mx-1" />
 
         <button
           onClick={openModal}
-          className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-dp-hover"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-gg-hover"
         >
-          <div className="relative flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-dp-border bg-dp-s2">
-            <svg className="h-4 w-4 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="relative flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-gg-border bg-gg-s2">
+            <svg className="h-4 w-4 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
             <img
@@ -111,15 +111,15 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
               onError={() => setAvatarLoaded(false)}
             />
           </div>
-          <span className="hidden text-xs font-medium text-dp-text sm:inline">{profile.display_name || "Profile"}</span>
-          <svg className="h-3 w-3 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <span className="hidden text-xs font-medium text-gg-text sm:inline">{profile.display_name || "Profile"}</span>
+          <svg className="h-3 w-3 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
           </svg>
         </button>
 
         <button
           onClick={handleSignOut}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-hover hover:text-red-400"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-hover hover:text-red-400"
           title="Sign out"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -135,15 +135,15 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="relative w-full max-w-sm rounded-2xl border border-dp-border bg-dp-s1 p-6 shadow-2xl"
+            className="relative w-full max-w-sm rounded-2xl border border-gg-border bg-gg-s1 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="mb-5 text-sm font-semibold text-dp-text">Edit Profile</h2>
+            <h2 className="mb-5 text-sm font-semibold text-gg-text">Edit Profile</h2>
 
             <div className="mb-5 flex items-center gap-4">
               <div className="relative">
-                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-dp-border bg-dp-s2">
-                  <svg className="h-8 w-8 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-gg-border bg-gg-s2">
+                  <svg className="h-8 w-8 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                   </svg>
                   <img
@@ -157,7 +157,7 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
                 </div>
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-dp-border bg-dp-s1 text-dp-text2 transition hover:text-orange-400"
+                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-gg-border bg-gg-s1 text-gg-text2 transition hover:text-violet-400"
                 >
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
@@ -165,29 +165,29 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </div>
-              <div className="text-xs text-dp-text2">
-                <p className="font-medium text-dp-text">Profile Photo</p>
-                <p className="mt-0.5 text-dp-text3">Stored in your Drive</p>
+              <div className="text-xs text-gg-text2">
+                <p className="font-medium text-gg-text">Profile Photo</p>
+                <p className="mt-0.5 text-gg-text3">Stored in your Drive</p>
               </div>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-dp-text2">Display Name</label>
+                <label className="mb-1 block text-xs font-medium text-gg-text2">Display Name</label>
                 <input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-lg border border-dp-border bg-dp-bg px-3 py-2 text-sm text-dp-text placeholder-dp-text3 outline-none focus:border-orange-500/50"
+                  className="w-full rounded-lg border border-gg-border bg-gg-bg px-3 py-2 text-sm text-gg-text placeholder-gg-text3 outline-none focus:border-violet-500/50"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-dp-text2">Bio</label>
+                <label className="mb-1 block text-xs font-medium text-gg-text2">Bio</label>
                 <input
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
                   placeholder="A short bio"
-                  className="w-full rounded-lg border border-dp-border bg-dp-bg px-3 py-2 text-sm text-dp-text placeholder-dp-text3 outline-none focus:border-orange-500/50"
+                  className="w-full rounded-lg border border-gg-border bg-gg-bg px-3 py-2 text-sm text-gg-text placeholder-gg-text3 outline-none focus:border-violet-500/50"
                 />
               </div>
             </div>
@@ -195,14 +195,14 @@ export default function Navbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 rounded-lg border border-dp-border py-2 text-sm text-dp-text2 transition hover:bg-dp-hover"
+                className="flex-1 rounded-lg border border-gg-border py-2 text-sm text-gg-text2 transition hover:bg-gg-hover"
               >
                 Cancel
               </button>
               <button
                 onClick={saveProfile}
                 disabled={saving}
-                className="flex-1 rounded-lg bg-orange-500 py-2 text-sm font-medium text-white transition hover:bg-orange-400 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-violet-600 py-2 text-sm font-medium text-white transition hover:bg-violet-500 disabled:opacity-50"
               >
                 {saving ? "Saving…" : "Save"}
               </button>

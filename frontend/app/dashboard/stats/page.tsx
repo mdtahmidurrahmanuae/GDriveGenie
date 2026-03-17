@@ -62,13 +62,13 @@ function CustomTooltip({ active, payload, label, formatter }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-dp-border bg-dp-s1 px-3 py-2 shadow-xl text-xs">
-      {label && <p className="mb-1 font-medium text-dp-text">{label}</p>}
+    <div className="rounded-lg border border-gg-border bg-gg-s1 px-3 py-2 shadow-xl text-xs">
+      {label && <p className="mb-1 font-medium text-gg-text">{label}</p>}
       {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.color }} />
-          <span className="text-dp-text2">{p.name}:</span>
-          <span className="font-medium text-dp-text">{formatter ? formatter(p.value) : p.value}</span>
+          <span className="text-gg-text2">{p.name}:</span>
+          <span className="font-medium text-gg-text">{formatter ? formatter(p.value) : p.value}</span>
         </div>
       ))}
     </div>
@@ -113,8 +113,8 @@ export default function StatsPage() {
     return (
       <div className="flex items-center justify-center py-32">
         <div className="text-center">
-          <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-dp-border border-t-orange-500" />
-          <p className="text-sm text-dp-text2">Loading statistics…</p>
+          <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-gg-border border-t-violet-500" />
+          <p className="text-sm text-gg-text2">Loading statistics…</p>
         </div>
       </div>
     );
@@ -136,12 +136,12 @@ export default function StatsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-dp-text">Analytics</h1>
-          <p className="mt-1 text-sm text-dp-text2">
+          <h1 className="text-xl font-semibold text-gg-text">Analytics</h1>
+          <p className="mt-1 text-sm text-gg-text2">
             Storage usage and upload trends
             {fromCache && (
-              <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-dp-border px-2 py-0.5 text-xs text-dp-text3">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-gg-border px-2 py-0.5 text-xs text-gg-text3">
+                <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
                 Cached
               </span>
             )}
@@ -149,7 +149,7 @@ export default function StatsPage() {
         </div>
         <button
           onClick={forceRefresh}
-          className="flex items-center gap-1.5 rounded-lg border border-dp-border bg-dp-s1 px-3 py-2 text-xs text-dp-text2 transition hover:border-orange-500/30 hover:text-orange-400"
+          className="flex items-center gap-1.5 rounded-lg border border-gg-border bg-gg-s1 px-3 py-2 text-xs text-gg-text2 transition hover:border-violet-500/30 hover:text-violet-400"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -161,21 +161,21 @@ export default function StatsPage() {
       {/* Summary chips */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Total Files", value: stats.totalFiles.toString(), color: "text-orange-400" },
+          { label: "Total Files", value: stats.totalFiles.toString(), color: "text-violet-400" },
           { label: "Total Folders", value: stats.totalFolders.toString(), color: "text-yellow-400" },
           { label: "Total Size", value: formatBytes(stats.totalSize), color: "text-blue-400" },
           { label: "Accounts", value: connectedAccounts.length.toString(), color: "text-emerald-400" },
         ].map((item) => (
-          <div key={item.label} className="rounded-xl border border-dp-border bg-dp-s1 px-4 py-3">
+          <div key={item.label} className="rounded-xl border border-gg-border bg-gg-s1 px-4 py-3">
             <p className={`text-xl font-semibold ${item.color}`}>{item.value}</p>
-            <p className="mt-0.5 text-xs text-dp-text2">{item.label}</p>
+            <p className="mt-0.5 text-xs text-gg-text2">{item.label}</p>
           </div>
         ))}
       </div>
 
       {/* Weekly uploads */}
-      <div className="rounded-xl border border-dp-border bg-dp-s1 p-5">
-        <h2 className="mb-5 text-sm font-medium text-dp-text">Weekly Upload Activity</h2>
+      <div className="rounded-xl border border-gg-border bg-gg-s1 p-5">
+        <h2 className="mb-5 text-sm font-medium text-gg-text">Weekly Upload Activity</h2>
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={stats.weeklyUploads} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
@@ -184,9 +184,9 @@ export default function StatsPage() {
                 <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--dp-border)" />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--dp-text3)" }} />
-            <YAxis tick={{ fontSize: 10, fill: "var(--dp-text3)" }} allowDecimals={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--gg-border)" />
+            <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--gg-text3)" }} />
+            <YAxis tick={{ fontSize: 10, fill: "var(--gg-text3)" }} allowDecimals={false} />
             <Tooltip
               content={<CustomTooltip />}
               wrapperStyle={TOOLTIP_WRAPPER}
@@ -198,16 +198,16 @@ export default function StatsPage() {
 
       {/* Storage + pie */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-dp-border bg-dp-s1 p-5">
-          <h2 className="mb-5 text-sm font-medium text-dp-text">Storage by Account</h2>
+        <div className="rounded-xl border border-gg-border bg-gg-s1 p-5">
+          <h2 className="mb-5 text-sm font-medium text-gg-text">Storage by Account</h2>
           {storageData.length === 0 ? (
-            <p className="py-8 text-center text-sm text-dp-text3">No connected accounts</p>
+            <p className="py-8 text-center text-sm text-gg-text3">No connected accounts</p>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={storageData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--dp-border)" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--dp-text3)" }} />
-                <YAxis tick={{ fontSize: 10, fill: "var(--dp-text3)" }} tickFormatter={(v) => formatBytes(v)} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--gg-border)" />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--gg-text3)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "var(--gg-text3)" }} tickFormatter={(v) => formatBytes(v)} />
                 <Tooltip
                   content={<CustomTooltip formatter={formatBytes} />}
                   wrapperStyle={TOOLTIP_WRAPPER}
@@ -217,16 +217,16 @@ export default function StatsPage() {
                     <Cell key={i} fill={ACCOUNT_COLORS[i % ACCOUNT_COLORS.length]} />
                   ))}
                 </Bar>
-                <Bar dataKey="free" name="Free" stackId="a" fill="var(--dp-hover)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="free" name="Free" stackId="a" fill="var(--gg-hover)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
 
-        <div className="rounded-xl border border-dp-border bg-dp-s1 p-5">
-          <h2 className="mb-5 text-sm font-medium text-dp-text">Files by Type</h2>
+        <div className="rounded-xl border border-gg-border bg-gg-s1 p-5">
+          <h2 className="mb-5 text-sm font-medium text-gg-text">Files by Type</h2>
           {pieData.length === 0 ? (
-            <p className="py-8 text-center text-sm text-dp-text3">No files yet</p>
+            <p className="py-8 text-center text-sm text-gg-text3">No files yet</p>
           ) : (
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="55%" height={200}>
@@ -244,9 +244,9 @@ export default function StatsPage() {
                   <div key={entry.name} className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: TYPE_COLORS[entry.name] ?? "#6b7280" }} />
-                      <span className="truncate text-xs text-dp-text2">{entry.name}</span>
+                      <span className="truncate text-xs text-gg-text2">{entry.name}</span>
                     </div>
-                    <span className="flex-shrink-0 text-xs font-medium text-dp-text">{entry.value}</span>
+                    <span className="flex-shrink-0 text-xs font-medium text-gg-text">{entry.value}</span>
                   </div>
                 ))}
               </div>
@@ -257,8 +257,8 @@ export default function StatsPage() {
 
       {/* Size by type */}
       {Object.keys(stats.sizeByType).length > 0 && (
-        <div className="rounded-xl border border-dp-border bg-dp-s1 p-5">
-          <h2 className="mb-5 text-sm font-medium text-dp-text">Storage by File Type</h2>
+        <div className="rounded-xl border border-gg-border bg-gg-s1 p-5">
+          <h2 className="mb-5 text-sm font-medium text-gg-text">Storage by File Type</h2>
           <div className="space-y-3">
             {Object.entries(stats.sizeByType)
               .sort(([, a], [, b]) => b - a)
@@ -267,10 +267,10 @@ export default function StatsPage() {
                 return (
                   <div key={type}>
                     <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="text-dp-text2">{type}</span>
-                      <span className="text-dp-text3">{formatBytes(size)} ({pct.toFixed(1)}%)</span>
+                      <span className="text-gg-text2">{type}</span>
+                      <span className="text-gg-text3">{formatBytes(size)} ({pct.toFixed(1)}%)</span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-dp-hover">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gg-hover">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{ width: `${pct}%`, backgroundColor: TYPE_COLORS[type] ?? "#6b7280" }}

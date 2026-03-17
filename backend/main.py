@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="DrivePool API", lifespan=lifespan)
+app = FastAPI(title="GDriveGenie API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

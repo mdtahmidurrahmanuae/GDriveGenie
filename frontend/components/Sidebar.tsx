@@ -79,7 +79,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-40 flex h-screen flex-none flex-col border-r border-dp-border bg-dp-sidebar transition-all duration-200
+          fixed inset-y-0 left-0 z-40 flex h-screen flex-none flex-col border-r border-gg-border bg-gg-sidebar transition-all duration-200
           lg:relative lg:z-auto lg:translate-x-0
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           w-64
@@ -87,19 +87,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         `}
       >
         {/* Logo + collapse toggle */}
-        <div className={`flex items-center border-b border-dp-border px-3 py-[14px] ${collapsed ? "lg:justify-center" : "justify-between"}`}>
+        <div className={`flex items-center border-b border-gg-border px-3 py-[14px] ${collapsed ? "lg:justify-center" : "justify-between"}`}>
           <div className={`flex items-center gap-2.5 ${collapsed ? "lg:justify-center" : ""}`}>
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/10">
-              <svg className="h-3.5 w-3.5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-600/10">
+              <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
               </svg>
             </div>
-            <span className={`text-sm font-semibold text-dp-text ${collapsed ? "lg:hidden" : ""}`}>DrivePool</span>
+            <span className={`text-sm font-semibold ${collapsed ? "lg:hidden" : ""}`}>
+              <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">GDriveGenie</span>
+            </span>
           </div>
           {/* Close button on mobile */}
           <button
             onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text lg:hidden"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text lg:hidden"
             title="Close menu"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -110,7 +112,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {!collapsed && (
             <button
               onClick={() => setCollapsed(true)}
-              className="hidden h-6 w-6 items-center justify-center rounded-md text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text lg:flex"
+              className="hidden h-6 w-6 items-center justify-center rounded-md text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text lg:flex"
               title="Collapse sidebar"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -123,7 +125,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Nav */}
         <nav className={`flex-1 space-y-0.5 py-4 ${collapsed ? "lg:px-1.5 px-3" : "px-3"}`}>
           {!collapsed && (
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-dp-text3">Menu</p>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gg-text3">Menu</p>
           )}
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -133,15 +135,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 title={collapsed ? item.label : undefined}
                 onClick={onClose}
-                className={`flex items-center gap-3 rounded-lg transition-all ${collapsed ? "lg:justify-center lg:px-0 lg:py-2.5 px-3 py-2.5" : "px-3 py-2.5"} text-sm ${
+                className={`relative flex items-center gap-3 rounded-lg transition-all ${collapsed ? "lg:justify-center lg:px-0 lg:py-2.5 px-3 py-2.5" : "px-3 py-2.5"} text-sm ${
                   isActive
-                    ? "bg-orange-500/10 font-medium text-orange-400"
-                    : "text-dp-text2 hover:bg-dp-hover hover:text-dp-text"
+                    ? "bg-violet-600/10 font-medium text-violet-400 shadow-sm shadow-violet-600/5"
+                    : "text-gg-text2 hover:bg-gg-hover hover:text-gg-text"
                 }`}
               >
-                <span className={isActive ? "text-orange-400" : ""}>{item.icon}</span>
+                <span className={isActive ? "text-violet-400" : ""}>{item.icon}</span>
                 <span className={collapsed ? "lg:hidden" : ""}>{item.label}</span>
-                {!collapsed && isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-400" />}
+                {!collapsed && isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-violet-500" />}
               </Link>
             );
           })}
@@ -149,15 +151,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Storage */}
         {!collapsed && (
-          <div className="mx-3 mb-3 rounded-xl border border-dp-border bg-dp-bg p-4">
+          <div className="mx-3 mb-3 rounded-xl border border-gg-border bg-gg-bg p-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-medium text-dp-text">Storage Pool</span>
-              <span className="rounded-full border border-dp-border px-2 py-0.5 text-[10px] text-dp-text3">{connectedCount} active</span>
+              <span className="text-xs font-medium text-gg-text">Storage Pool</span>
+              <span className="rounded-full border border-gg-border px-2 py-0.5 text-[10px] text-gg-text3">{connectedCount} active</span>
             </div>
-            <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-dp-border">
-              <div className="h-full rounded-full bg-orange-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+            <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-gg-border">
+              <div className="h-full rounded-full bg-violet-600 transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
-            <div className="flex justify-between text-xs text-dp-text3">
+            <div className="flex justify-between text-xs text-gg-text3">
               <span>{formatBytes(totalUsed)} used</span>
               <span>{formatBytes(Math.max(0, totalLimit - totalUsed))} free</span>
             </div>
@@ -169,7 +171,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="mb-3 hidden justify-center lg:flex">
             <button
               onClick={() => setCollapsed(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text"
               title="Expand sidebar"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -1,74 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Dark theme (default) ─────────────────────────────────── */
+/* ─── GDriveGenie Design Tokens ──────────────────────────── */
 :root {
-  --dp-bg: #141c2f;
-  --dp-s1: #1d2842;
-  --dp-s2: #243250;
-  --dp-border: #2e3f5c;
-  --dp-hover: #1a2438;
-  --dp-text: #e8eeff;
-  --dp-text2: #7d94b4;
-  --dp-text3: #4a6080;
-  --dp-sidebar: #0f1826;
+  --gg-bg:      #09090f;
+  --gg-s1:      #0f0f1a;
+  --gg-s2:      #161622;
+  --gg-border:  #252538;
+  --gg-hover:   #1c1c2e;
+  --gg-text:    #ededff;
+  --gg-text2:   #8888aa;
+  --gg-text3:   #55556f;
+  --gg-sidebar: #06060e;
 }
 
-/* ── Light theme ─────────────────────────────────────────── */
 :root.light {
-  --dp-bg: #f8f9ff;
-  --dp-s1: #ffffff;
-  --dp-s2: #eef1ff;
-  --dp-border: #dde3f0;
-  --dp-hover: #f2f5ff;
-  --dp-text: #0d1630;
-  --dp-text2: #4a5f82;
-  --dp-text3: #8a9aba;
-  --dp-sidebar: #ffffff;
+  --gg-bg:      #f8f8ff;
+  --gg-s1:      #ffffff;
+  --gg-s2:      #f0f0ff;
+  --gg-border:  #ddddf0;
+  --gg-hover:   #ebebff;
+  --gg-text:    #0a0a1e;
+  --gg-text2:   #505075;
+  --gg-text3:   #8080a8;
+  --gg-sidebar: #f4f4ff;
+}
+
+/* ─── Base ────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 58, 237, 0.35) transparent;
+}
+
+html, body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: var(--dp-bg);
-  color: var(--dp-text);
+  background-color: var(--gg-bg);
+  color: var(--gg-text);
 }
 
-/* ── Scrollbar ───────────────────────────────────────────── */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--dp-border) transparent;
-}
-::-webkit-scrollbar { width: 5px; height: 5px; }
+/* ─── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background-color: var(--dp-border);
-  border-radius: 3px;
+  background: rgba(124, 58, 237, 0.4);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.65);
 }
 
-/* ── Landing page animations ─────────────────────────────── */
+/* ─── Dot Grid Background ─────────────────────────────────── */
+.dot-bg {
+  background-image: radial-gradient(circle, rgba(139, 92, 246, 0.13) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+:root.light .dot-bg {
+  background-image: radial-gradient(circle, rgba(124, 58, 237, 0.1) 1px, transparent 1px);
+}
+
+/* ─── Gradient Text ───────────────────────────────────────── */
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fdba74 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #818cf8 40%, #c4b5fd 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientShift 4s ease infinite;
+  animation: gradientShift 5s ease infinite;
 }
 
-.grid-bg {
-  background-image:
-    linear-gradient(rgba(249, 115, 22, 0.07) 1px, transparent 1px),
-    linear-gradient(to right, rgba(249, 115, 22, 0.07) 1px, transparent 1px);
-  background-size: 48px 48px;
+/* ─── Glassmorphism ───────────────────────────────────────── */
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(15, 15, 26, 0.55);
+  border: 1px solid rgba(37, 37, 56, 0.7);
 }
 
-:root.light .grid-bg {
-  background-image:
-    linear-gradient(rgba(249, 115, 22, 0.09) 1px, transparent 1px),
-    linear-gradient(to right, rgba(249, 115, 22, 0.09) 1px, transparent 1px);
+:root.light .glass {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(221, 221, 240, 0.8);
 }
+
+/* ─── Glow Effects ────────────────────────────────────────── */
+.glow-violet {
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.12), 0 0 80px rgba(99, 46, 207, 0.06);
+}
+
+/* ─── Animations ──────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-float      { animation: float   4s ease-in-out infinite; }
+.animate-float-slow { animation: float   6s ease-in-out infinite; }
+.animate-float-fast { animation: float   3s ease-in-out infinite; }
+.animate-fadeUp     { animation: fadeUp  0.5s ease forwards; }
+.animate-fadeIn     { animation: fadeIn  0.4s ease forwards; }
+.animate-pulse-glow { animation: pulseGlow 4s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }

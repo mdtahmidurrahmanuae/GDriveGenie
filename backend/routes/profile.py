@@ -60,7 +60,7 @@ async def upload_avatar(file: UploadFile, db: Session = Depends(get_db), _=Depen
     content = await file.read()
 
     folder_id = get_or_create_profile_folder(account)
-    result = upload_file(account, io.BytesIO(content), "_drivepool_avatar_", mime_type, parent_folder_id=folder_id)
+    result = upload_file(account, io.BytesIO(content), "_gdriveGenie_avatar_", mime_type, parent_folder_id=folder_id)
 
     profile = _get_or_create_profile(db)
     profile.avatar_drive_file_id = result["drive_file_id"]

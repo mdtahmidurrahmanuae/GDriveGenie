@@ -10,8 +10,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" />
       </svg>
     ),
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
+    color: "text-violet-400",
+    bg: "bg-violet-600/10",
     title: "Unified Storage Pool",
     desc: "Combine unlimited Google Drive accounts into one dashboard. N accounts × 15 GB = effectively unlimited free cloud storage.",
   },
@@ -21,8 +21,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
       </svg>
     ),
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
+    color: "text-violet-400",
+    bg: "bg-violet-600/10",
     title: "Smart Upload Routing",
     desc: "Least-Used-Space strategy automatically routes every upload to the account with the most free space. Zero manual management.",
   },
@@ -87,8 +87,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
       </svg>
     ),
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
+    color: "text-violet-400",
+    bg: "bg-violet-600/10",
     title: "Rich Analytics",
     desc: "Storage breakdown per account, file type distribution, weekly upload activity, and per-type storage bars — all client-side.",
   },
@@ -109,7 +109,7 @@ const features = [
 function DriveIcon({ color, delay = "0s" }: { color: string; delay?: string }) {
   return (
     <div
-      className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dp-border bg-dp-s1 shadow-xl"
+      className="flex h-16 w-16 items-center justify-center rounded-2xl border border-gg-border bg-gg-s1 shadow-xl"
       style={{ animation: `float 4s ease-in-out ${delay} infinite` }}
     >
       <svg viewBox="0 0 24 24" className="h-8 w-8" fill={color}>
@@ -123,26 +123,26 @@ export default function LandingPage() {
   const { theme, toggle } = useTheme();
 
   return (
-    <div className="min-h-screen bg-dp-bg text-dp-text">
+    <div className="min-h-screen bg-gg-bg text-gg-text">
       {/* ── Navbar ─────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 border-b border-dp-border bg-dp-bg/80 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-gg-border bg-gg-bg/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/10">
-              <svg className="h-4 w-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-600/10">
+              <svg className="h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-dp-text">DrivePool</span>
+            <span className="text-sm font-semibold text-gg-text">GDriveGenie</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/docs" className="hidden text-xs text-dp-text2 transition hover:text-dp-text sm:inline">
+            <Link href="/docs" className="hidden text-xs text-gg-text2 transition hover:text-gg-text sm:inline">
               Docs
             </Link>
             <button
               onClick={toggle}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-dp-border text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gg-border text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
               title="Toggle theme"
             >
               {theme === "dark" ? (
@@ -156,10 +156,10 @@ export default function LandingPage() {
               )}
             </button>
             <a
-              href="https://github.com/saimon4u/Drive-Pool"
+              href="https://github.com/saimon4u/GDriveGenie"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-lg border border-dp-border px-3 py-1.5 text-xs text-dp-text2 transition hover:border-orange-500/40 hover:text-dp-text"
+              className="flex items-center gap-1.5 rounded-lg border border-gg-border px-3 py-1.5 text-xs text-gg-text2 transition hover:border-violet-500/40 hover:text-gg-text"
             >
               <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
@@ -168,7 +168,7 @@ export default function LandingPage() {
             </a>
             <Link
               href="/login"
-              className="rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-white shadow shadow-orange-500/20 transition hover:bg-orange-400"
+              className="rounded-lg bg-violet-600 px-4 py-1.5 text-xs font-semibold text-white shadow shadow-violet-600/20 transition hover:bg-violet-500"
             >
               Get Started
             </Link>
@@ -178,24 +178,28 @@ export default function LandingPage() {
 
       {/* ── Hero ───────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="grid-bg absolute inset-0" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-dp-bg" />
+        <div className="dot-bg absolute inset-0" />
+        {/* Ambient glow orbs */}
+        <div className="absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-violet-600/10 blur-3xl" />
+        <div className="absolute top-20 right-10 h-64 w-64 rounded-full bg-indigo-600/8 blur-3xl" />
+        <div className="absolute top-32 left-10 h-48 w-48 rounded-full bg-purple-600/8 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gg-bg" />
 
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-24 text-center md:py-32">
           {/* Badge */}
-          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
-            <span className="text-xs font-medium text-orange-400">Open Source · Free Forever · Self-Hosted</span>
+          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-600/5 px-4 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+            <span className="text-xs font-medium text-violet-400">Open Source · Free Forever · Self-Hosted</span>
           </div>
 
-          <h1 className="animate-fade-up-d1 mb-6 text-5xl font-bold leading-tight tracking-tight text-dp-text md:text-7xl">
+          <h1 className="animate-fade-up-d1 mb-6 text-5xl font-bold leading-tight tracking-tight text-gg-text md:text-7xl">
             Your Storage,{" "}
             <span className="gradient-text">Multiplied</span>
           </h1>
 
-          <p className="animate-fade-up-d2 mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-dp-text2">
-            DrivePool aggregates multiple Google Drive accounts into a single unified dashboard.
-            Get up to <strong className="text-dp-text">N × 15 GB</strong> free cloud storage with
+          <p className="animate-fade-up-d2 mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gg-text2">
+            GDriveGenie aggregates multiple Google Drive accounts into a single unified dashboard.
+            Get up to <strong className="text-gg-text">N × 15 GB</strong> free cloud storage with
             smart routing, drag-to-folder moves, trash management, shared files, and rich analytics —
             all self-hosted on your machine.
           </p>
@@ -203,7 +207,7 @@ export default function LandingPage() {
           <div className="animate-fade-up-d3 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-400"
+              className="flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -211,10 +215,10 @@ export default function LandingPage() {
               Open Dashboard
             </Link>
             <a
-              href="https://github.com/saimon4u/Drive-Pool"
+              href="https://github.com/saimon4u/GDriveGenie"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-xl border border-dp-border bg-dp-s1 px-6 py-3 font-semibold text-dp-text transition hover:border-orange-500/40"
+              className="flex items-center gap-2 rounded-xl border border-gg-border bg-gg-s1 px-6 py-3 font-semibold text-gg-text transition hover:border-violet-500/40"
             >
               <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
@@ -228,30 +232,30 @@ export default function LandingPage() {
             <DriveIcon color="#4285F4" delay="0s" />
             <DriveIcon color="#34A853" delay="0.8s" />
             <div className="mb-6 flex h-8 w-8 items-center justify-center">
-              <svg className="h-6 w-6 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-6 w-6 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
               </svg>
             </div>
             <DriveIcon color="#FBBC04" delay="0.4s" />
             <DriveIcon color="#EA4335" delay="1.2s" />
             <div className="mb-6 flex h-8 w-8 items-center justify-center">
-              <svg className="h-6 w-6 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-6 w-6 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
               </svg>
             </div>
             {/* Unified pool */}
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-orange-500/40 bg-orange-500/10 shadow-xl shadow-orange-500/20"
+              className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-violet-500/40 bg-violet-600/10 shadow-xl shadow-violet-600/20"
               style={{ animation: "float 3s ease-in-out infinite" }}
             >
-              <svg className="h-10 w-10 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="h-10 w-10 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
               </svg>
             </div>
           </div>
 
           {/* Stats bar */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 border-t border-dp-border pt-8">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 border-t border-gg-border pt-8">
             {[
               { label: "Free Storage per Account", value: "15 GB" },
               { label: "Max Accounts", value: "Unlimited" },
@@ -259,8 +263,8 @@ export default function LandingPage() {
               { label: "Cost", value: "$0" },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-2xl font-bold text-dp-text">{s.value}</div>
-                <div className="mt-0.5 text-xs text-dp-text3">{s.label}</div>
+                <div className="text-2xl font-bold text-gg-text">{s.value}</div>
+                <div className="mt-0.5 text-xs text-gg-text3">{s.label}</div>
               </div>
             ))}
           </div>
@@ -270,11 +274,11 @@ export default function LandingPage() {
       {/* ── Features ───────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 py-20">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold text-dp-text md:text-4xl">
+          <h2 className="text-3xl font-bold text-gg-text md:text-4xl">
             Everything you need,{" "}
             <span className="gradient-text">nothing you don&apos;t</span>
           </h2>
-          <p className="mt-4 text-dp-text2">
+          <p className="mt-4 text-gg-text2">
             A focused set of features built for power users who want more from their free cloud storage.
           </p>
         </div>
@@ -283,28 +287,28 @@ export default function LandingPage() {
           {features.map((f) => (
             <div
               key={f.title}
-              className="group rounded-2xl border border-dp-border bg-dp-s1 p-6 transition hover:border-orange-500/30 hover:bg-dp-hover"
+              className="group rounded-2xl border border-gg-border bg-gg-s1/80 p-6 backdrop-blur-sm transition hover:border-violet-500/40 hover:bg-gg-hover hover:shadow-lg hover:shadow-violet-600/5"
             >
               <div className={`mb-4 inline-flex rounded-xl p-2.5 ${f.bg}`}>
                 <span className={f.color}>{f.icon}</span>
               </div>
-              <h3 className="mb-2 font-semibold text-dp-text">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-dp-text2">{f.desc}</p>
+              <h3 className="mb-2 font-semibold text-gg-text">{f.title}</h3>
+              <p className="text-sm leading-relaxed text-gg-text2">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Dashboard pages showcase ────────────────────────── */}
-      <section className="border-t border-dp-border bg-dp-s1 py-20">
+      <section className="border-t border-gg-border bg-gg-s1 py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-dp-text md:text-4xl">
+            <h2 className="text-3xl font-bold text-gg-text md:text-4xl">
               Six dedicated views,{" "}
               <span className="gradient-text">one coherent app</span>
             </h2>
-            <p className="mt-4 text-dp-text2">
-              Every section of DrivePool is purpose-built — no bloat, no clutter.
+            <p className="mt-4 text-gg-text2">
+              Every section of GDriveGenie is purpose-built — no bloat, no clutter.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -312,9 +316,9 @@ export default function LandingPage() {
               {
                 path: "/dashboard",
                 label: "Overview",
-                color: "text-orange-400",
-                bg: "bg-orange-500/10",
-                border: "border-orange-500/20",
+                color: "text-violet-400",
+                bg: "bg-violet-600/10",
+                border: "border-violet-500/20",
                 desc: "Stats cards, per-account storage bars, file type breakdown, and recent files at a glance.",
               },
               {
@@ -360,12 +364,12 @@ export default function LandingPage() {
             ].map((page) => (
               <div
                 key={page.path}
-                className={`rounded-2xl border ${page.border} bg-dp-bg p-5 transition hover:bg-dp-hover`}
+                className={`rounded-2xl border ${page.border} bg-gg-bg p-5 transition hover:bg-gg-hover`}
               >
                 <div className={`mb-3 inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ${page.color} ${page.bg}`}>
                   {page.label}
                 </div>
-                <p className="text-sm leading-relaxed text-dp-text2">{page.desc}</p>
+                <p className="text-sm leading-relaxed text-gg-text2">{page.desc}</p>
               </div>
             ))}
           </div>
@@ -376,8 +380,8 @@ export default function LandingPage() {
       <section className="py-20">
         <div className="mx-auto max-w-4xl px-6">
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-bold text-dp-text md:text-4xl">Get started in minutes</h2>
-            <p className="mt-4 text-dp-text2">
+            <h2 className="text-3xl font-bold text-gg-text md:text-4xl">Get started in minutes</h2>
+            <p className="mt-4 text-gg-text2">
               Our step-by-step guide walks you from cloning the repo to a fully working storage pool.
             </p>
           </div>
@@ -385,13 +389,13 @@ export default function LandingPage() {
           {/* Quick overview chips */}
           <div className="mb-10 grid gap-3 sm:grid-cols-3">
             {[
-              { n: "01", label: "Create Google Cloud credentials for each account", color: "text-orange-400", bg: "bg-orange-500/10" },
+              { n: "01", label: "Create Google Cloud credentials for each account", color: "text-violet-400", bg: "bg-violet-600/10" },
               { n: "02", label: "Run generate_secrets.py — secrets saved to local DB", color: "text-emerald-400", bg: "bg-emerald-500/10" },
               { n: "03", label: "Start both servers and connect accounts via OAuth", color: "text-blue-400", bg: "bg-blue-500/10" },
             ].map((step) => (
-              <div key={step.n} className="flex items-center gap-3 rounded-xl border border-dp-border bg-dp-s1 p-4">
+              <div key={step.n} className="flex items-center gap-3 rounded-xl border border-gg-border bg-gg-s1 p-4">
                 <span className={`flex-shrink-0 text-xs font-bold ${step.color} ${step.bg} rounded-lg px-2 py-1`}>{step.n}</span>
-                <span className="text-sm text-dp-text2">{step.label}</span>
+                <span className="text-sm text-gg-text2">{step.label}</span>
               </div>
             ))}
           </div>
@@ -399,45 +403,45 @@ export default function LandingPage() {
           <div className="text-center">
             <Link
               href="/docs"
-              className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-8 py-3.5 font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-400"
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
               </svg>
               Read the Full Setup Guide
             </Link>
-            <p className="mt-3 text-xs text-dp-text3">Takes about 15 minutes end-to-end</p>
+            <p className="mt-3 text-xs text-gg-text3">Takes about 15 minutes end-to-end</p>
           </div>
         </div>
       </section>
 
       {/* ── Open Source CTA ────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 py-20 text-center">
-        <div className="relative overflow-hidden rounded-3xl border border-orange-500/20 bg-orange-500/5 p-12">
-          <div className="absolute inset-0 grid-bg opacity-30" />
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-500/5 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-orange-500/5 blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-violet-500/20 bg-violet-600/5 p-12">
+          <div className="absolute inset-0 dot-bg opacity-30" />
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-600/5 blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-600/5 blur-3xl" />
 
           <div className="relative">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5">
-              <svg className="h-3.5 w-3.5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-600/10 px-4 py-1.5">
+              <svg className="h-3.5 w-3.5 text-violet-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
               </svg>
-              <span className="text-xs font-medium text-orange-400">Open Source Initiative</span>
+              <span className="text-xs font-medium text-violet-400">Open Source Initiative</span>
             </div>
-            <h2 className="mb-4 text-3xl font-bold text-dp-text md:text-4xl">
+            <h2 className="mb-4 text-3xl font-bold text-gg-text md:text-4xl">
               Built in the open, for everyone
             </h2>
-            <p className="mx-auto mb-8 max-w-xl text-dp-text2">
-              DrivePool is free software. Inspect every line, contribute improvements, report issues,
+            <p className="mx-auto mb-8 max-w-xl text-gg-text2">
+              GDriveGenie is free software. Inspect every line, contribute improvements, report issues,
               or fork it for your own use. No vendor lock-in. No subscription. No data harvesting.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a
-                href="https://github.com/saimon4u/Drive-Pool"
+                href="https://github.com/saimon4u/GDriveGenie"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-orange-500/30 bg-orange-500/10 px-6 py-3 font-semibold text-orange-400 transition hover:bg-orange-500/20"
+                className="flex items-center gap-2 rounded-xl border border-violet-500/30 bg-violet-600/10 px-6 py-3 font-semibold text-violet-400 transition hover:bg-violet-600/20"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
@@ -446,9 +450,9 @@ export default function LandingPage() {
               </a>
               <Link
                 href="/login"
-                className="rounded-xl bg-orange-500 px-6 py-3 font-semibold text-white shadow shadow-orange-500/25 transition hover:bg-orange-400"
+                className="rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white shadow shadow-violet-600/25 transition hover:bg-violet-500"
               >
-                Start Using DrivePool
+                Start Using GDriveGenie
               </Link>
             </div>
           </div>
@@ -456,17 +460,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-dp-border bg-dp-s1 py-8">
+      <footer className="border-t border-gg-border bg-gg-s1 py-8">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/10">
-              <svg className="h-3.5 w-3.5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-600/10">
+              <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
               </svg>
             </div>
-            <span className="text-sm font-medium text-dp-text2">DrivePool</span>
+            <span className="text-sm font-medium text-gg-text2">GDriveGenie</span>
           </div>
-          <p className="text-xs text-dp-text3">
+          <p className="text-xs text-gg-text3">
             Free &amp; open source · Self-hosted Google Drive aggregator
           </p>
         </div>

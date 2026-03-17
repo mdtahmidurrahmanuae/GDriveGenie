@@ -11,18 +11,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: "#6366f1",
-        dp: {
-          bg: "var(--dp-bg)",
-          s1: "var(--dp-s1)",
-          s2: "var(--dp-s2)",
-          border: "var(--dp-border)",
-          hover: "var(--dp-hover)",
-          text: "var(--dp-text)",
-          text2: "var(--dp-text2)",
-          text3: "var(--dp-text3)",
-          sidebar: "var(--dp-sidebar)",
-        },
+        brand: "#7c3aed",
+        "gg-bg":      "var(--gg-bg)",
+        "gg-s1":      "var(--gg-s1)",
+        "gg-s2":      "var(--gg-s2)",
+        "gg-border":  "var(--gg-border)",
+        "gg-hover":   "var(--gg-hover)",
+        "gg-text":    "var(--gg-text)",
+        "gg-text2":   "var(--gg-text2)",
+        "gg-text3":   "var(--gg-text3)",
+        "gg-sidebar": "var(--gg-sidebar)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       keyframes: {
         float: {
@@ -37,6 +38,10 @@ const config: Config = {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        gradientShift: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         float: "float 4s ease-in-out infinite",
@@ -48,6 +53,10 @@ const config: Config = {
         "fade-up-d3": "fadeUp 0.6s 0.3s ease forwards both",
         "fade-up-d4": "fadeUp 0.6s 0.4s ease forwards both",
         "fade-in": "fadeIn 0.4s ease forwards",
+        "gradient-shift": "gradientShift 5s ease infinite",
+      },
+      backdropBlur: {
+        xs: "2px",
       },
     },
   },

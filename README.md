@@ -1,4 +1,4 @@
-# DrivePool
+# GDriveGenie
 
 Self-hosted unified dashboard that aggregates multiple Google Drive accounts into a single storage pool. Every upload automatically routes to the account with the most available space — no manual management, no paid tier.
 
@@ -6,9 +6,9 @@ Self-hosted unified dashboard that aggregates multiple Google Drive accounts int
 
 ---
 
-## Why DrivePool?
+## Why GDriveGenie?
 
-Google gives every account **15 GB free**. DrivePool lets you combine as many accounts as you want into one unified interface — effectively giving you N × 15 GB of free cloud storage. Add more accounts at any time without changing any configuration.
+Google gives every account **15 GB free**. GDriveGenie lets you combine as many accounts as you want into one unified interface — effectively giving you N × 15 GB of free cloud storage. Add more accounts at any time without changing any configuration.
 
 ---
 
@@ -36,8 +36,8 @@ Google gives every account **15 GB free**. DrivePool lets you combine as many ac
 ### 1. Clone
 
 ```bash
-git clone https://github.com/saimon4u/Drive-Pool.git
-cd DrivePool
+git clone https://github.com/saimon4u/GDriveGenie.git
+cd GDriveGenie
 ```
 
 ### 2. Google OAuth credentials
@@ -59,7 +59,7 @@ pip install -r backend/requirements.txt
 python backend/scripts/generate_secrets.py
 ```
 
-Enter a PIN when prompted — your PIN hash, JWT secret, and encryption key are written directly to `backend/drivepool.db`. No `.env` file needed.
+Enter a PIN when prompted — your PIN hash, JWT secret, and encryption key are written directly to `backend/gdriveGenie.db`. No `.env` file needed.
 
 ### 4. Start the servers
 
@@ -81,7 +81,7 @@ That's it — start uploading at [http://localhost:3000/dashboard](http://localh
 
 ## Docker
 
-Docker Compose is the easiest way to run DrivePool without installing Python or Node.js locally.
+Docker Compose is the easiest way to run GDriveGenie without installing Python or Node.js locally.
 
 **Prerequisites:** Docker and Docker Compose
 
@@ -101,7 +101,7 @@ docker compose build
 docker compose run --rm backend python scripts/generate_secrets.py
 ```
 
-Enter a PIN when prompted. Secrets are written to the `drivepool_data` persistent Docker volume.
+Enter a PIN when prompted. Secrets are written to the `gdriveGenie_data` persistent Docker volume.
 
 ### 4. Start the stack
 
@@ -115,7 +115,7 @@ Open [http://localhost:3000](http://localhost:3000). View logs anytime with `doc
 
 | Data | Storage |
 |------|---------|
-| SQLite database | `drivepool_data` named Docker volume |
+| SQLite database | `gdriveGenie_data` named Docker volume |
 | Google credentials | `./config/credentials.json` (bind-mounted read-only) |
 
 ### Environment variables
@@ -126,10 +126,10 @@ All variables have sensible defaults for local use. Override them in `docker-com
 |----------|---------|---------|
 | `FRONTEND_URL` | `http://localhost:3000` | Allowed CORS origin for the backend |
 | `BACKEND_URL` | `http://localhost:8000` | Public URL used to build the OAuth callback URI |
-| `DB_PATH` | `backend/drivepool.db` | Path to the SQLite database file |
+| `DB_PATH` | `backend/gdriveGenie.db` | Path to the SQLite database file |
 | `CONFIG_DIR` | `config/` | Directory containing `credentials.json` |
 
-> **`BACKEND_URL` is important:** DrivePool uses it to construct the OAuth redirect URI sent to Google. The default works for local and Docker deployments. If you put the backend behind a reverse proxy or a different hostname, update this value — and add the new callback URL to your Google Cloud Console authorized redirect URIs.
+> **`BACKEND_URL` is important:** GDriveGenie uses it to construct the OAuth redirect URI sent to Google. The default works for local and Docker deployments. If you put the backend behind a reverse proxy or a different hostname, update this value — and add the new callback URL to your Google Cloud Console authorized redirect URIs.
 
 ---
 
@@ -141,9 +141,9 @@ Go to **Settings** and click **Connect another account** — no file changes, no
 
 ## Security notes
 
-- `config/credentials.json` and `backend/drivepool.db` contain sensitive data — keep them out of version control (already covered by `.gitignore`) and back them up securely.
+- `config/credentials.json` and `backend/gdriveGenie.db` contain sensitive data — keep them out of version control (already covered by `.gitignore`) and back them up securely.
 - OAuth refresh tokens are encrypted with Fernet (AES-128-CBC) before being stored. The encryption key lives in the database alongside the PIN hash and JWT secret.
-- If you expose DrivePool over the internet, put it behind a reverse proxy with HTTPS and update both `FRONTEND_URL` and `BACKEND_URL` accordingly.
+- If you expose GDriveGenie over the internet, put it behind a reverse proxy with HTTPS and update both `FRONTEND_URL` and `BACKEND_URL` accordingly.
 
 ---
 

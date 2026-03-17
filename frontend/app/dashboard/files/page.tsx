@@ -179,18 +179,18 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
     if (isGoogleWorkspace) {
       return (
         <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-          <svg className="h-12 w-12 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="h-12 w-12 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
           </svg>
           <div>
-            <p className="text-sm font-medium text-dp-text">Google Workspace file</p>
-            <p className="mt-1 text-xs text-dp-text3">This file type can only be previewed in Google Drive.</p>
+            <p className="text-sm font-medium text-gg-text">Google Workspace file</p>
+            <p className="mt-1 text-xs text-gg-text3">This file type can only be previewed in Google Drive.</p>
           </div>
           <a
             href={`https://drive.google.com/file/d/${file.drive_file_id}/view`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-400"
+            className="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -232,17 +232,17 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
     }
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-        <svg className="h-12 w-12 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-12 w-12 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
         </svg>
         <div>
-          <p className="text-sm font-medium text-dp-text">No preview available</p>
-          <p className="mt-1 text-xs text-dp-text3">This file type cannot be previewed in the browser.</p>
+          <p className="text-sm font-medium text-gg-text">No preview available</p>
+          <p className="mt-1 text-xs text-gg-text3">This file type cannot be previewed in the browser.</p>
         </div>
         <a
           href={`/api/files/${file.id}/download`}
           download={file.file_name}
-          className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-400"
+          className="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -259,25 +259,25 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
       onClick={onClose}
     >
       <div
-        className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-dp-border bg-dp-s1 shadow-2xl"
+        className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-gg-border bg-gg-s1 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-dp-border px-5 py-3">
+        <div className="flex items-center justify-between border-b border-gg-border px-5 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <svg className="h-4 w-4 flex-shrink-0 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-4 w-4 flex-shrink-0 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
-            <p className="truncate text-sm font-medium text-dp-text">{file.file_name}</p>
-            <span className="flex-shrink-0 rounded-md border border-dp-border px-1.5 py-0.5 text-[10px] text-dp-text3">#{file.account_index}</span>
+            <p className="truncate text-sm font-medium text-gg-text">{file.file_name}</p>
+            <span className="flex-shrink-0 rounded-md border border-gg-border px-1.5 py-0.5 text-[10px] text-gg-text3">#{file.account_index}</span>
           </div>
           <div className="flex items-center gap-2">
             {!isGoogleWorkspace && (
               <a
                 href={`/api/files/${file.id}/download`}
                 download={file.file_name}
-                className="flex items-center gap-1.5 rounded-lg border border-dp-border px-3 py-1.5 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+                className="flex items-center gap-1.5 rounded-lg border border-gg-border px-3 py-1.5 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -287,7 +287,7 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
             )}
             <button
               onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-dp-text3 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-gg-text3 transition hover:bg-gg-hover hover:text-gg-text"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -296,7 +296,7 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
           </div>
         </div>
         {/* Content */}
-        <div className="overflow-auto bg-dp-bg">
+        <div className="overflow-auto bg-gg-bg">
           {renderContent()}
         </div>
       </div>
@@ -349,7 +349,7 @@ function ActionsMenu({
     <div ref={menuRef} className="relative">
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-dp-text2 transition hover:bg-dp-s2 hover:text-dp-text"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-gg-text2 transition hover:bg-gg-s2 hover:text-gg-text"
         title="More actions"
       >
         <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -360,11 +360,11 @@ function ActionsMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-1 z-30 min-w-[160px] rounded-xl border border-dp-border bg-dp-s1 py-1 shadow-xl">
+        <div className="absolute right-0 bottom-full mb-1 z-30 min-w-[160px] rounded-xl border border-gg-border bg-gg-s1 py-1 shadow-xl">
           {!isFolder && (
             <button
               onClick={() => { onPreview(); setOpen(false); }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
@@ -375,7 +375,7 @@ function ActionsMenu({
           )}
           <button
             onClick={() => { onRename(); setOpen(false); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
@@ -385,7 +385,7 @@ function ActionsMenu({
           {!isFolder && (
             <button
               onClick={() => { onDownload(); setOpen(false); }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -395,7 +395,7 @@ function ActionsMenu({
           )}
           <button
             onClick={() => { onShare(); setOpen(false); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
@@ -404,7 +404,7 @@ function ActionsMenu({
           </button>
           <button
             onClick={handleLocate}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -414,7 +414,7 @@ function ActionsMenu({
           {inFolder && onMoveToRoot && (
             <button
               onClick={() => { onMoveToRoot(); setOpen(false); }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover hover:text-dp-text"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover hover:text-gg-text"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -422,7 +422,7 @@ function ActionsMenu({
               Move to root
             </button>
           )}
-          <div className="my-1 border-t border-dp-border" />
+          <div className="my-1 border-t border-gg-border" />
           <button
             onClick={() => { onDelete(); setOpen(false); }}
             className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-400 transition hover:bg-red-500/5"
@@ -537,14 +537,14 @@ function GridCard({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`group rounded-xl border bg-dp-s1 transition ${deleting ? "opacity-40" : ""} ${dragOver ? "border-orange-500 bg-orange-500/5" : "border-dp-border hover:border-orange-500/30 hover:bg-dp-hover"}`}
+      className={`group rounded-xl border bg-gg-s1 transition ${deleting ? "opacity-40" : ""} ${dragOver ? "border-violet-500 bg-violet-600/5" : "border-gg-border hover:border-violet-500/30 hover:bg-gg-hover"}`}
     >
       <div
-        className={`relative flex h-32 items-center justify-center overflow-hidden rounded-t-xl bg-dp-bg ${isFolder ? "cursor-pointer" : ""}`}
+        className={`relative flex h-32 items-center justify-center overflow-hidden rounded-t-xl bg-gg-bg ${isFolder ? "cursor-pointer" : ""}`}
         onClick={() => isFolder ? onOpen(file) : undefined}
       >
         <FileTypeIcon mimeType={file.mime_type} size={44} />
-        <span className="absolute right-2 top-2 rounded-full border border-dp-border bg-dp-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-dp-text3">
+        <span className="absolute right-2 top-2 rounded-full border border-gg-border bg-gg-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-gg-text3">
           #{file.account_index}
         </span>
       </div>
@@ -558,18 +558,18 @@ function GridCard({
               onChange={(e) => setEditName(e.target.value)}
               onBlur={commitRename}
               onKeyDown={handleKeyDown}
-              className="w-full rounded-md border border-orange-500/50 bg-dp-bg px-2 py-0.5 text-xs text-dp-text outline-none"
+              className="w-full rounded-md border border-violet-500/50 bg-gg-bg px-2 py-0.5 text-xs text-gg-text outline-none"
             />
           ) : (
             <p
-              className={`truncate text-sm font-medium text-dp-text ${isFolder ? "cursor-pointer hover:text-orange-400" : ""}`}
+              className={`truncate text-sm font-medium text-gg-text ${isFolder ? "cursor-pointer hover:text-violet-400" : ""}`}
               onClick={() => isFolder ? onOpen(file) : undefined}
               title={file.file_name}
             >
               {file.file_name}
             </p>
           )}
-          <p className="mt-0.5 text-xs text-dp-text3">{isFolder ? "Folder" : formatBytes(file.size)}</p>
+          <p className="mt-0.5 text-xs text-gg-text3">{isFolder ? "Folder" : formatBytes(file.size)}</p>
         </div>
         <ActionsMenu file={file} onRename={() => setEditing(true)} onDownload={handleDownload} onDelete={handleDelete} onShare={() => onShare(file)} onPreview={() => onPreview(file)} inFolder={inFolder} onMoveToRoot={onMoveToRoot} />
       </div>
@@ -676,7 +676,7 @@ function ListRow({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`group border-b border-dp-border transition ${deleting ? "opacity-40" : ""} ${dragOver ? "bg-orange-500/5 outline outline-1 outline-orange-500/40" : "hover:bg-dp-hover"}`}
+      className={`group border-b border-gg-border transition ${deleting ? "opacity-40" : ""} ${dragOver ? "bg-violet-600/5 outline outline-1 outline-violet-500/40" : "hover:bg-gg-hover"}`}
     >
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
@@ -687,10 +687,10 @@ function ListRow({
             <FileTypeIcon mimeType={file.mime_type} size={28} />
           </div>
           {editing ? (
-            <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)} onBlur={commitRename} onKeyDown={handleKeyDown} className="rounded-lg border border-orange-500/50 bg-dp-bg px-2 py-0.5 text-sm text-dp-text outline-none" />
+            <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)} onBlur={commitRename} onKeyDown={handleKeyDown} className="rounded-lg border border-violet-500/50 bg-gg-bg px-2 py-0.5 text-sm text-gg-text outline-none" />
           ) : (
             <span
-              className={`text-sm text-dp-text ${isFolder ? "cursor-pointer font-medium hover:text-orange-400" : ""}`}
+              className={`text-sm text-gg-text ${isFolder ? "cursor-pointer font-medium hover:text-violet-400" : ""}`}
               onClick={() => isFolder ? onOpen(file) : undefined}
               title={file.file_name}
             >
@@ -699,11 +699,11 @@ function ListRow({
           )}
         </div>
       </td>
-      <td className="hidden px-4 py-3 text-sm text-dp-text3 sm:table-cell">{isFolder ? "—" : formatBytes(file.size)}</td>
+      <td className="hidden px-4 py-3 text-sm text-gg-text3 sm:table-cell">{isFolder ? "—" : formatBytes(file.size)}</td>
       <td className="hidden px-4 py-3 md:table-cell">
-        <span className="rounded-md border border-dp-border px-2 py-0.5 text-xs text-dp-text3">#{file.account_index}</span>
+        <span className="rounded-md border border-gg-border px-2 py-0.5 text-xs text-gg-text3">#{file.account_index}</span>
       </td>
-      <td className="hidden px-4 py-3 text-sm text-dp-text3 md:table-cell">{new Date(file.created_at).toLocaleDateString()}</td>
+      <td className="hidden px-4 py-3 text-sm text-gg-text3 md:table-cell">{new Date(file.created_at).toLocaleDateString()}</td>
       <td className="px-4 py-3">
         <ActionsMenu file={file} onRename={() => setEditing(true)} onDownload={handleDownload} onDelete={handleDelete} onShare={() => onShare(file)} onPreview={() => onPreview(file)} inFolder={inFolder} onMoveToRoot={onMoveToRoot} />
       </td>
@@ -767,7 +767,7 @@ function FolderDropPanel({
         onDragLeave={() => setDropTarget(null)}
         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setDropTarget(null); onDrop(driveId); }}
         className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
-          isOver ? "border-orange-500 bg-orange-500/10" : "border-dp-border bg-dp-s1 hover:border-orange-500/30 hover:bg-dp-hover"
+          isOver ? "border-violet-500 bg-violet-600/10" : "border-gg-border bg-gg-s1 hover:border-violet-500/30 hover:bg-gg-hover"
         }`}
       >
         <svg width={20} height={20} viewBox="0 0 48 48" fill="none" className="flex-shrink-0">
@@ -785,9 +785,9 @@ function FolderDropPanel({
           <path d="M4 14h14l4 -5h2v5" fill="url(#fp-back)" />
           <rect x="4" y="20" width="40" height="20" rx="3" fill="url(#fp-front)" />
         </svg>
-        <span className="truncate text-xs text-dp-text" title={name}>{name}</span>
+        <span className="truncate text-xs text-gg-text" title={name}>{name}</span>
         {isOver && (
-          <svg className="ml-auto h-3.5 w-3.5 flex-shrink-0 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="ml-auto h-3.5 w-3.5 flex-shrink-0 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
           </svg>
         )}
@@ -796,16 +796,16 @@ function FolderDropPanel({
   }
 
   return (
-    <div className="pointer-events-auto fixed right-0 top-0 z-40 flex h-full w-72 flex-col border-l border-dp-border bg-dp-s1 shadow-2xl">
-      <div className="flex items-center justify-between border-b border-dp-border px-4 py-4">
+    <div className="pointer-events-auto fixed right-0 top-0 z-40 flex h-full w-72 flex-col border-l border-gg-border bg-gg-s1 shadow-2xl">
+      <div className="flex items-center justify-between border-b border-gg-border px-4 py-4">
         <div>
-          <p className="text-sm font-semibold text-dp-text">Move to folder</p>
-          <p className="mt-0.5 truncate text-[11px] text-dp-text3" title={draggedFile.file_name}>
+          <p className="text-sm font-semibold text-gg-text">Move to folder</p>
+          <p className="mt-0.5 truncate text-[11px] text-gg-text3" title={draggedFile.file_name}>
             {draggedFile.file_name} · #{draggedFile.account_index}
           </p>
         </div>
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-dp-border">
-          <svg className="h-3.5 w-3.5 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-gg-border">
+          <svg className="h-3.5 w-3.5 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
           </svg>
         </div>
@@ -818,13 +818,13 @@ function FolderDropPanel({
         className="flex-1 overflow-y-auto p-3"
       >
         <div className="mb-2 space-y-1.5">
-          <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-dp-text3">Root</p>
+          <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-gg-text3">Root</p>
           {renderFolderItem("root", "My Drive (root)")}
         </div>
 
         {folders.length > 0 && (
           <div className="mt-4 space-y-1.5">
-            <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-dp-text3">
+            <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-gg-text3">
               Folders ({folders.length})
             </p>
             {folders.map((f) => renderFolderItem(f.drive_file_id, f.file_name))}
@@ -833,16 +833,16 @@ function FolderDropPanel({
 
         {folders.length === 0 && (
           <div className="mt-8 flex flex-col items-center gap-2 text-center">
-            <svg className="h-8 w-8 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-8 w-8 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
-            <p className="text-xs text-dp-text3">No folders on this account</p>
+            <p className="text-xs text-gg-text3">No folders on this account</p>
           </div>
         )}
       </div>
 
-      <div className="border-t border-dp-border px-4 py-3">
-        <p className="text-[10px] text-dp-text3">Drop file onto a folder to move it</p>
+      <div className="border-t border-gg-border px-4 py-3">
+        <p className="text-[10px] text-gg-text3">Drop file onto a folder to move it</p>
       </div>
     </div>
   );
@@ -952,10 +952,10 @@ export default function FilesPage() {
   }, [visibleFiles, search, filterAccount, filterType, sortBy]);
 
   function openFolder(file: FileItem) {
-    const scroller = document.getElementById("dp-scroll");
+    const scroller = document.getElementById("gg-scroll");
     scrollStack.current = [...scrollStack.current, scroller?.scrollTop ?? 0];
     setBreadcrumb((prev) => [...prev, { id: file.drive_file_id, name: file.file_name }]);
-    setTimeout(() => { document.getElementById("dp-scroll")?.scrollTo({ top: 0 }); }, 0);
+    setTimeout(() => { document.getElementById("gg-scroll")?.scrollTo({ top: 0 }); }, 0);
   }
 
   function navigateTo(index: number) {
@@ -963,7 +963,7 @@ export default function FilesPage() {
     scrollStack.current = scrollStack.current.slice(0, index);
     setBreadcrumb((prev) => prev.slice(0, index + 1));
     setTimeout(() => {
-      const scroller = document.getElementById("dp-scroll");
+      const scroller = document.getElementById("gg-scroll");
       if (scroller) scroller.scrollTop = savedScroll;
     }, 0);
   }
@@ -1094,19 +1094,19 @@ export default function FilesPage() {
           onClick={() => !shareModal.loading && !shareModal.revoking && setShareModal(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-dp-border bg-dp-s1 p-6 shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-gg-border bg-gg-s1 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-dp-text">Share link</p>
-                <p className="mt-0.5 truncate text-xs text-dp-text3" title={shareModal.file.file_name}>
+                <p className="text-sm font-semibold text-gg-text">Share link</p>
+                <p className="mt-0.5 truncate text-xs text-gg-text3" title={shareModal.file.file_name}>
                   {shareModal.file.file_name}
                 </p>
               </div>
               <button
                 onClick={() => setShareModal(null)}
-                className="flex-shrink-0 rounded-lg p-1 text-dp-text3 hover:bg-dp-hover hover:text-dp-text"
+                className="flex-shrink-0 rounded-lg p-1 text-gg-text3 hover:bg-gg-hover hover:text-gg-text"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -1115,7 +1115,7 @@ export default function FilesPage() {
             </div>
 
             {shareModal.loading ? (
-              <div className="flex items-center justify-center gap-2 py-6 text-dp-text3">
+              <div className="flex items-center justify-center gap-2 py-6 text-gg-text3">
                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
@@ -1123,22 +1123,22 @@ export default function FilesPage() {
               </div>
             ) : shareModal.link ? (
               <>
-                <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-dp-text3">Shareable link</div>
-                <div className="flex items-center gap-2 rounded-xl border border-dp-border bg-dp-bg px-3 py-2.5">
+                <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-gg-text3">Shareable link</div>
+                <div className="flex items-center gap-2 rounded-xl border border-gg-border bg-gg-bg px-3 py-2.5">
                   <input
                     readOnly
                     value={shareModal.link}
-                    className="min-w-0 flex-1 bg-transparent text-xs text-dp-text outline-none"
+                    className="min-w-0 flex-1 bg-transparent text-xs text-gg-text outline-none"
                     onFocus={(e) => e.target.select()}
                   />
                   <button
                     onClick={() => { navigator.clipboard.writeText(shareModal.link!); toast("Link copied!", "success"); }}
-                    className="flex-shrink-0 rounded-lg border border-dp-border bg-dp-s1 px-2.5 py-1.5 text-[11px] font-medium text-dp-text2 transition hover:border-orange-500/30 hover:text-orange-400"
+                    className="flex-shrink-0 rounded-lg border border-gg-border bg-gg-s1 px-2.5 py-1.5 text-[11px] font-medium text-gg-text2 transition hover:border-violet-500/30 hover:text-violet-400"
                   >
                     Copy
                   </button>
                 </div>
-                <p className="mt-2 text-[11px] text-dp-text3">Anyone with this link can view the file.</p>
+                <p className="mt-2 text-[11px] text-gg-text3">Anyone with this link can view the file.</p>
                 <div className="mt-5 flex justify-between gap-2">
                   <button
                     onClick={handleUnshare}
@@ -1154,7 +1154,7 @@ export default function FilesPage() {
                   </button>
                   <button
                     onClick={() => setShareModal(null)}
-                    className="rounded-lg border border-dp-border px-4 py-2 text-xs text-dp-text2 transition hover:bg-dp-hover"
+                    className="rounded-lg border border-gg-border px-4 py-2 text-xs text-gg-text2 transition hover:bg-gg-hover"
                   >
                     Done
                   </button>
@@ -1167,8 +1167,8 @@ export default function FilesPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-dp-text">Files</h1>
-          <p className="mt-1 text-sm text-dp-text2">
+          <h1 className="text-xl font-semibold text-gg-text">Files</h1>
+          <p className="mt-1 text-sm text-gg-text2">
             {filteredFiles.length !== visibleFiles.length
               ? `${filteredFiles.length} of ${visibleFiles.length} items`
               : `${visibleFiles.length} ${visibleFiles.length === 1 ? "item" : "items"}`}
@@ -1178,7 +1178,7 @@ export default function FilesPage() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="flex items-center gap-1.5 rounded-lg border border-dp-border bg-dp-s1 px-3 py-2 text-xs text-dp-text2 transition hover:border-orange-500/30 hover:text-orange-400 disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg border border-gg-border bg-gg-s1 px-3 py-2 text-xs text-gg-text2 transition hover:border-violet-500/30 hover:text-violet-400 disabled:opacity-40"
           >
             <svg className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
@@ -1186,13 +1186,13 @@ export default function FilesPage() {
             <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync"}</span>
           </button>
 
-          <div className="flex rounded-lg border border-dp-border bg-dp-s1 p-0.5">
-            <button onClick={() => setView("list")} className={`rounded-md p-1.5 transition ${view === "list" ? "bg-dp-hover text-dp-text" : "text-dp-text3 hover:text-dp-text2"}`} title="List view">
+          <div className="flex rounded-lg border border-gg-border bg-gg-s1 p-0.5">
+            <button onClick={() => setView("list")} className={`rounded-md p-1.5 transition ${view === "list" ? "bg-gg-hover text-gg-text" : "text-gg-text3 hover:text-gg-text2"}`} title="List view">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0Z" />
               </svg>
             </button>
-            <button onClick={() => setView("grid")} className={`rounded-md p-1.5 transition ${view === "grid" ? "bg-dp-hover text-dp-text" : "text-dp-text3 hover:text-dp-text2"}`} title="Grid view">
+            <button onClick={() => setView("grid")} className={`rounded-md p-1.5 transition ${view === "grid" ? "bg-gg-hover text-gg-text" : "text-gg-text3 hover:text-gg-text2"}`} title="Grid view">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25ZM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25Z" />
               </svg>
@@ -1201,7 +1201,7 @@ export default function FilesPage() {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-medium text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
+            className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-xs font-medium text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-500"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
@@ -1213,21 +1213,21 @@ export default function FilesPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[160px]">
-          <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search files…"
-            className="w-full rounded-lg border border-dp-border bg-dp-s1 py-2 pl-8 pr-3 text-xs text-dp-text placeholder-dp-text3 outline-none focus:border-orange-500/50"
+            className="w-full rounded-lg border border-gg-border bg-gg-s1 py-2 pl-8 pr-3 text-xs text-gg-text placeholder-gg-text3 outline-none focus:border-violet-500/50"
           />
         </div>
 
         <select
           value={filterAccount}
           onChange={(e) => setFilterAccount(e.target.value === "all" ? "all" : Number(e.target.value))}
-          className="rounded-lg border border-dp-border bg-dp-s1 px-2.5 py-2 text-xs text-dp-text2 outline-none focus:border-orange-500/50"
+          className="rounded-lg border border-gg-border bg-gg-s1 px-2.5 py-2 text-xs text-gg-text2 outline-none focus:border-violet-500/50"
         >
           <option value="all">All accounts</option>
           {accounts.filter((a) => a.is_connected).map((a) => (
@@ -1240,7 +1240,7 @@ export default function FilesPage() {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value as TypeFilter)}
-          className="rounded-lg border border-dp-border bg-dp-s1 px-2.5 py-2 text-xs text-dp-text2 outline-none focus:border-orange-500/50"
+          className="rounded-lg border border-gg-border bg-gg-s1 px-2.5 py-2 text-xs text-gg-text2 outline-none focus:border-violet-500/50"
         >
           <option value="all">All types</option>
           <option value="folder">Folders</option>
@@ -1256,7 +1256,7 @@ export default function FilesPage() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortKey)}
-          className="rounded-lg border border-dp-border bg-dp-s1 px-2.5 py-2 text-xs text-dp-text2 outline-none focus:border-orange-500/50"
+          className="rounded-lg border border-gg-border bg-gg-s1 px-2.5 py-2 text-xs text-gg-text2 outline-none focus:border-violet-500/50"
         >
           <option value="date-desc">Newest first</option>
           <option value="date-asc">Oldest first</option>
@@ -1267,17 +1267,17 @@ export default function FilesPage() {
         </select>
       </div>
 
-      <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-dp-border bg-dp-s1 px-4 py-2">
-        <svg className="mr-1 h-3.5 w-3.5 flex-shrink-0 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-gg-border bg-gg-s1 px-4 py-2">
+        <svg className="mr-1 h-3.5 w-3.5 flex-shrink-0 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
         </svg>
         {breadcrumb.map((entry, i) => (
           <div key={i} className="flex flex-shrink-0 items-center gap-1">
-            {i > 0 && <span className="text-dp-text3">/</span>}
+            {i > 0 && <span className="text-gg-text3">/</span>}
             <button
               onClick={() => navigateTo(i)}
               className={`rounded px-1.5 py-0.5 text-xs transition ${
-                i === breadcrumb.length - 1 ? "font-medium text-dp-text" : "text-dp-text2 hover:text-orange-400"
+                i === breadcrumb.length - 1 ? "font-medium text-gg-text" : "text-gg-text2 hover:text-violet-400"
               }`}
             >
               {entry.name}
@@ -1287,13 +1287,13 @@ export default function FilesPage() {
       </div>
 
       {filteredFiles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dp-border bg-dp-s1 py-20 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-dp-border bg-dp-bg">
-            <svg className="h-6 w-6 text-dp-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-gg-border bg-gg-s1 py-20 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-gg-border bg-gg-bg">
+            <svg className="h-6 w-6 text-gg-text3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
           </div>
-          <p className="text-sm text-dp-text3">
+          <p className="text-sm text-gg-text3">
             {search || filterAccount !== "all" || filterType !== "all"
               ? "No files match your filters."
               : breadcrumb.length > 1
@@ -1308,15 +1308,15 @@ export default function FilesPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-dp-border bg-dp-s1">
+        <div className="overflow-hidden rounded-xl border border-gg-border bg-gg-s1">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-dp-border">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3">Name</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 sm:table-cell">Size</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 md:table-cell">Account</th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3 md:table-cell">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-dp-text3">Actions</th>
+              <tr className="border-b border-gg-border">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3">Name</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 sm:table-cell">Size</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 md:table-cell">Account</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3 md:table-cell">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gg-text3">Actions</th>
               </tr>
             </thead>
             <tbody>

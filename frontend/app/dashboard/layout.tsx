@@ -10,11 +10,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <UploadProvider>
-      <div className="flex h-screen overflow-hidden bg-dp-bg">
+      <div className="flex h-screen overflow-hidden bg-gg-bg">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Navbar onMenuOpen={() => setSidebarOpen(true)} />
-          <main id="dp-scroll" className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <main id="gg-scroll" className="flex-1 overflow-y-auto p-4 lg:p-8">
             {children}
           </main>
         </div>
