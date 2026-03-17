@@ -28,7 +28,11 @@ async def lifespan(app: FastAPI):
                 pass
 
         # Load secrets from D1 into config module globals
-        await load_config(d1)
+        try:
+            await load_config(d1)
+        except Exception as e:
+            print(f"WARNING: Failed to load config from D1: {e}")
+            print("Run: python backend/scripts/generate_secrets.py")
 
         # Initial file sync (best-effort)
         try:
