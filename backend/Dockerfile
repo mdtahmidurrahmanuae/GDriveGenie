@@ -6,7 +6,7 @@ WORKDIR /app
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Stage 2: Runtime — copy only the venv and source, nothing else ─────────────
@@ -19,7 +19,7 @@ COPY --from=builder /venv /venv
 ENV PATH=/venv/bin:$PATH
 
 # Copy backend source (config/ and the database are handled via Docker volumes)
-COPY . .
+COPY backend/ .
 
 EXPOSE 8000
 
