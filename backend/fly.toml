@@ -28,6 +28,15 @@ primary_region = 'iad'
     hard_limit = 25
     soft_limit = 20
 
+  [[services.http_checks]]
+    interval       = 10000
+    timeout        = 2000
+    grace_period   = "5s"
+    method         = "get"
+    path           = "/active"
+    protocol       = "http"
+    restart_limit  = 0
+
 [[mounts]]
   source       = 'gdrivegenie_config'
   destination  = '/app/config'

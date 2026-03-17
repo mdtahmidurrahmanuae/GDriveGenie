@@ -61,6 +61,11 @@ app.include_router(files.router, prefix="/api")
 app.include_router(profile_router.router, prefix="/api")
 
 
+@app.get("/")
+def root():
+    return {"name": "GDriveGenie API", "status": "active"}
+
+
 @app.get("/active")
 def active():
     return {"status": "active"}
