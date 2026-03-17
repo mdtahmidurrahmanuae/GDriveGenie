@@ -38,7 +38,7 @@ function FileTypeIcon({ mimeType, size = 28 }: { mimeType: string | null; size?:
       </svg>
     );
   }
-  const color = t.startsWith("image/") ? "#fb923c"
+  const color = t.startsWith("image/") ? "#8b5cf6"
     : t.startsWith("video/") ? "#60a5fa"
     : t.startsWith("audio/") ? "#f472b6"
     : t.includes("pdf") ? "#f87171"

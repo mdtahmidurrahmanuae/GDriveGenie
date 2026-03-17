@@ -47,10 +47,10 @@ function FileTypeIcon({ mimeType, size = 40 }: { mimeType: string | null; size?:
       match: (t) => t.startsWith("image/"),
       render: () => (
         <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-          <rect width="48" height="48" rx="8" fill="#ea580c" fillOpacity="0.15" />
-          <rect x="10" y="12" width="28" height="24" rx="3" stroke="#fb923c" strokeWidth="2" fill="none" />
-          <circle cx="19" cy="21" r="3" fill="#fb923c" />
-          <path d="M10 30l8-8 6 6 4-4 10 8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <rect width="48" height="48" rx="8" fill="#6d28d9" fillOpacity="0.15" />
+          <rect x="10" y="12" width="28" height="24" rx="3" stroke="#8b5cf6" strokeWidth="2" fill="none" />
+          <circle cx="19" cy="21" r="3" fill="#8b5cf6" />
+          <path d="M10 30l8-8 6 6 4-4 10 8" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </svg>
       ),
     },
@@ -116,12 +116,12 @@ function FileTypeIcon({ mimeType, size = 40 }: { mimeType: string | null; size?:
       match: (t) => t.includes("zip") || t.includes("compressed") || t.includes("archive"),
       render: () => (
         <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-          <rect width="48" height="48" rx="8" fill="#ea580c" fillOpacity="0.15" />
-          <rect x="14" y="8" width="20" height="32" rx="3" stroke="#fb923c" strokeWidth="2" fill="none" />
-          <line x1="20" y1="8" x2="28" y2="8" stroke="#fb923c" strokeWidth="2" />
-          <line x1="20" y1="16" x2="28" y2="16" stroke="#fb923c" strokeWidth="2" />
-          <line x1="20" y1="24" x2="28" y2="24" stroke="#fb923c" strokeWidth="2" />
-          <rect x="20" y="28" width="8" height="6" rx="1" fill="#fb923c" fillOpacity="0.5" />
+          <rect width="48" height="48" rx="8" fill="#6d28d9" fillOpacity="0.15" />
+          <rect x="14" y="8" width="20" height="32" rx="3" stroke="#8b5cf6" strokeWidth="2" fill="none" />
+          <line x1="20" y1="8" x2="28" y2="8" stroke="#8b5cf6" strokeWidth="2" />
+          <line x1="20" y1="16" x2="28" y2="16" stroke="#8b5cf6" strokeWidth="2" />
+          <line x1="20" y1="24" x2="28" y2="24" stroke="#8b5cf6" strokeWidth="2" />
+          <rect x="20" y="28" width="8" height="6" rx="1" fill="#8b5cf6" fillOpacity="0.5" />
         </svg>
       ),
     },

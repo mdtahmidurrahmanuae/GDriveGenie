@@ -32,7 +32,7 @@ function formatBytes(bytes: number): string {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  Images: "#fb923c",
+  Images: "#8b5cf6",
   Videos: "#60a5fa",
   Audio: "#f472b6",
   PDFs: "#f87171",
@@ -40,11 +40,11 @@ const TYPE_COLORS: Record<string, string> = {
   Spreadsheets: "#34d399",
   Presentations: "#fbbf24",
   Folders: "#fcd34d",
-  Archives: "#fb923c",
+  Archives: "#8b5cf6",
   Other: "#6b7280",
 };
 
-const ACCOUNT_COLORS = ["#f97316", "#f97316", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+const ACCOUNT_COLORS = ["#7c3aed", "#7c3aed", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
 
 const TOOLTIP_WRAPPER: React.CSSProperties = {
   background: "none",
@@ -180,8 +180,8 @@ export default function StatsPage() {
           <AreaChart data={stats.weeklyUploads} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="uploadGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--gg-border)" />
@@ -191,7 +191,7 @@ export default function StatsPage() {
               content={<CustomTooltip />}
               wrapperStyle={TOOLTIP_WRAPPER}
             />
-            <Area type="monotone" dataKey="count" name="Uploads" stroke="#f97316" strokeWidth={2} fill="url(#uploadGrad)" />
+            <Area type="monotone" dataKey="count" name="Uploads" stroke="#7c3aed" strokeWidth={2} fill="url(#uploadGrad)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
