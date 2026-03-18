@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import config
-from routes import auth, accounts, files, admin, folders, shares
+from routes import auth, accounts, files, admin, folders, shares, sort
 from routes import profile as profile_router
 from services.pb_client import init_pb
 from services.drive_service import sync_files_from_drives
@@ -46,6 +46,7 @@ app.include_router(folders.router, prefix="/api")
 app.include_router(shares.router, prefix="/api")
 app.include_router(profile_router.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(sort.router, prefix="/api")
 
 
 @app.get("/")

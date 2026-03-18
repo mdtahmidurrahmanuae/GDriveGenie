@@ -27,6 +27,7 @@ from services.drive_service import (
     unshare_file,
     upload_file,
 )
+from services.sort_service import sort_all_drives as _sort_all_drives
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/files", tags=["files"])
@@ -229,6 +230,19 @@ async def upload(
                 })
         except Exception:
             pass
+
+    # Auto-sort: move the newly uploaded file into its MIME-type folder in background
+    async def _auto_sort():
+        from services.pb_client import PBClient as _PB
+        bg_pb = _PB()
+        try:
+            await _sort_all_drives(bg_pb, user_id)
+        except Exception:
+            pass
+        finally:
+            await bg_pb.aclose()
+
+    background_tasks.add_task(asyncio.run, _auto_sort())
 
     f = File.from_pb(new_file, account_index=account.account_index)
     return _file_to_dict(f, account.email)

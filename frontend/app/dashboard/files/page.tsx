@@ -853,6 +853,13 @@ export default function FilesPage() {
   const { accounts, refreshStorage } = useStorage();
   const { upload, addCompleteListener, setCurrentFolder, toast, updateToast, confirm } = useUpload();
   const [syncing, setSyncing] = useState(false);
+  const [sorting, setSorting] = useState(false);
+  const [sortResult, setSortResult] = useState<{
+    total_moved: number;
+    total_skipped: number;
+    total_errors: number;
+    accounts: { email: string | null; account_index: number; moved: number; skipped: number; errors: number; by_folder: Record<string, number> }[];
+  } | null>(null);
   const [view, setView] = useState<"list" | "grid">("grid");
   const [breadcrumb, setBreadcrumb] = useState<BreadcrumbEntry[]>([{ id: null, name: "All Files" }]);
   const scrollStack = useRef<number[]>([]);
@@ -1065,6 +1072,24 @@ export default function FilesPage() {
     setSyncing(false);
   }
 
+  async function handleSort() {
+    setSorting(true);
+    try {
+      const res = await fetch("/api/sort", { method: "POST", credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setSortResult(data);
+        await refreshFiles();
+      } else {
+        toast("Sort failed. Please try again.", "error");
+      }
+    } catch {
+      toast("Sort failed. Please try again.", "error");
+    } finally {
+      setSorting(false);
+    }
+  }
+
   function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     Array.from(e.target.files ?? []).forEach((f) => upload(f));
     e.target.value = "";
@@ -1086,6 +1111,54 @@ export default function FilesPage() {
 
       {previewFile && (
         <PreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
+      )}
+
+      {sortResult && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setSortResult(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-gg-border bg-gg-s1 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gg-text">Sort complete</p>
+                <p className="mt-0.5 text-xs text-gg-text3">
+                  {sortResult.total_moved} moved &middot; {sortResult.total_skipped} already sorted &middot; {sortResult.total_errors} errors
+                </p>
+              </div>
+              <button
+                onClick={() => setSortResult(null)}
+                className="flex-shrink-0 rounded-lg p-1 text-gg-text3 hover:bg-gg-hover hover:text-gg-text"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {sortResult.accounts.map((acc) => (
+                <div key={acc.account_index} className="rounded-xl border border-gg-border bg-gg-bg p-3">
+                  <p className="mb-2 text-xs font-medium text-gg-text truncate">{acc.email ?? `Account ${acc.account_index + 1}`}</p>
+                  <p className="text-[11px] text-gg-text3 mb-2">
+                    {acc.moved} moved &middot; {acc.skipped} skipped &middot; {acc.errors} errors
+                  </p>
+                  {Object.keys(acc.by_folder).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.entries(acc.by_folder).map(([name, count]) => (
+                        <span key={name} className="rounded-full bg-violet-600/15 px-2 py-0.5 text-[10px] font-medium text-violet-400">
+                          {name}: {count}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {shareModal && (
@@ -1184,6 +1257,21 @@ export default function FilesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
             <span className="hidden sm:inline">{syncing ? "Syncing…" : "Sync"}</span>
+          </button>
+
+          <button
+            onClick={handleSort}
+            disabled={sorting}
+            className="flex items-center gap-1.5 rounded-lg border border-gg-border bg-gg-s1 px-3 py-2 text-xs text-gg-text2 transition hover:border-violet-500/30 hover:text-violet-400 disabled:opacity-40"
+            title="Sort all files into folders by type"
+          >
+            <svg className={`h-3.5 w-3.5 ${sorting ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {sorting
+                ? <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                : <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M6 12h12M9 17h6" />
+              }
+            </svg>
+            <span className="hidden sm:inline">{sorting ? "Sorting…" : "Sort"}</span>
           </button>
 
           <div className="flex rounded-lg border border-gg-border bg-gg-s1 p-0.5">
