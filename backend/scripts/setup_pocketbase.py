@@ -81,10 +81,12 @@ def create_collection(client: httpx.Client, pb_url: str, token: str, schema: dic
         raise SystemExit(f"Failed to create collection '{name}': {r.status_code} {r.text}")
     result = r.json()
     print(f"  ✓ Created collection '{name}'")
-    # Patch indexes in a second request
+    # Patch indexes in a second request using the full current state
     if indexes:
-        result["indexes"] = indexes
-        r2 = client.patch(f"{pb_url}/api/collections/{name}", headers=headers, json={"indexes": indexes})
+        r_get = client.get(f"{pb_url}/api/collections/{name}", headers=headers)
+        current = r_get.json()
+        current["indexes"] = indexes
+        r2 = client.patch(f"{pb_url}/api/collections/{name}", headers=headers, json=current)
         if r2.status_code in (200, 204):
             print(f"  ✓ Applied indexes to '{name}'")
         else:
