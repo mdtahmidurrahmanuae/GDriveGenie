@@ -70,18 +70,19 @@ def create_collection(client: httpx.Client, pb_url: str, token: str, schema: dic
     headers = {"Authorization": token}
     # Try to get existing
     name = schema["name"]
+    indexes = schema.pop("indexes", [])
     r = client.get(f"{pb_url}/api/collections/{name}", headers=headers)
     if r.status_code == 200:
         print(f"  ✓ Collection '{name}' already exists — skipping")
-        return r.json()
-    # Create without indexes first (PocketBase evaluates indexes before fields are ready)
-    indexes = schema.pop("indexes", [])
-    r = client.post(f"{pb_url}/api/collections", headers=headers, json=schema)
-    if r.status_code not in (200, 204):
-        raise SystemExit(f"Failed to create collection '{name}': {r.status_code} {r.text}")
-    result = r.json()
-    print(f"  ✓ Created collection '{name}'")
-    # Patch indexes in a second request using the full current state
+        result = r.json()
+    else:
+        # Create without indexes first (PocketBase evaluates indexes before fields are ready)
+        r = client.post(f"{pb_url}/api/collections", headers=headers, json=schema)
+        if r.status_code not in (200, 204):
+            raise SystemExit(f"Failed to create collection '{name}': {r.status_code} {r.text}")
+        result = r.json()
+        print(f"  ✓ Created collection '{name}'")
+    # Always apply indexes (idempotent — PocketBase skips existing ones)
     if indexes:
         r_get = client.get(f"{pb_url}/api/collections/{name}", headers=headers)
         current = r_get.json()
