@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     environment:
-      FRONTEND_URL: http://${SERVER_IP}
-      BACKEND_URL: http://${SERVER_IP}
+      FRONTEND_URL: https://gdrive.genericxinus.com
+      BACKEND_URL: https://gdrive.genericxinus.com
       CONFIG_DIR: /app/config
       CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
       CF_D1_DATABASE_ID: ${CF_D1_DATABASE_ID}
@@ -39,8 +39,10 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gdrivegenie.rule=Host(`${SERVER_IP}`)"
-      - "traefik.http.routers.gdrivegenie.entrypoints=web"
+      - "traefik.http.routers.gdrivegenie.rule=Host(`gdrive.genericxinus.com`)"
+      - "traefik.http.routers.gdrivegenie.entrypoints=web,websecure"
+      - "traefik.http.routers.gdrivegenie.tls=true"
+      - "traefik.http.routers.gdrivegenie.tls.certresolver=letsencrypt"
       - "traefik.http.services.gdrivegenie.loadbalancer.server.port=80"
       - "traefik.docker.network=dokploy-network"
 
