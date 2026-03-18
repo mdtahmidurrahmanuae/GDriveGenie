@@ -6,7 +6,8 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [pin, setPin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,13 +19,14 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify({ email, password }),
         credentials: "include",
       });
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        setError("Invalid PIN. Please try again.");
+        const data = await res.json().catch(() => ({}));
+        setError(data.detail || "Invalid email or password.");
       }
     } catch {
       setError("Connection error. Is the backend running?");
@@ -53,18 +55,34 @@ export default function LoginPage() {
               <span className="text-sm font-semibold text-gg-text">GDriveGenie</span>
             </Link>
             <h1 className="text-2xl font-semibold tracking-tight text-gg-text">Welcome back</h1>
-            <p className="mt-1.5 text-sm text-gg-text2">Enter your PIN to access the dashboard</p>
+            <p className="mt-1.5 text-sm text-gg-text2">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="password"
-              placeholder="••••••"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              autoFocus
-              className="w-full rounded-xl border border-gg-border bg-gg-bg px-4 py-3 text-center text-xl tracking-[0.5em] text-gg-text placeholder-gg-text3 outline-none transition focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30"
-            />
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gg-text2 uppercase tracking-wide">Email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus
+                required
+                className="w-full rounded-xl border border-gg-border bg-gg-bg px-4 py-3 text-sm text-gg-text placeholder-gg-text3 outline-none transition focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gg-text2 uppercase tracking-wide">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded-xl border border-gg-border bg-gg-bg px-4 py-3 text-sm text-gg-text placeholder-gg-text3 outline-none transition focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/30"
+              />
+            </div>
 
             {error && (
               <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
@@ -77,7 +95,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || !pin}
+              disabled={loading || !email || !password}
               className="w-full rounded-xl bg-violet-600 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? (
@@ -86,9 +104,9 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Verifying…
+                  Signing in…
                 </span>
-              ) : "Unlock Dashboard"}
+              ) : "Sign in"}
             </button>
           </form>
         </div>

@@ -4,43 +4,27 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import config
-from config import load_config
-from database import CREATE_TABLES_SQL, MIGRATION_SQL
-from routes import auth, accounts, files
+from routes import auth, accounts, files, admin, folders, shares
 from routes import profile as profile_router
-from services.d1_client import D1Client
+from services.pb_client import init_pb
 from services.drive_service import sync_files_from_drives
+from services.pb_client import PBClient
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    d1 = D1Client()
+    # Authenticate with PocketBase admin
+    await init_pb()
+
+    # Best-effort startup sync across all users
     try:
-        # Create tables (idempotent)
-        for sql in CREATE_TABLES_SQL:
-            await d1.execute(sql)
-
-        # Run migrations — ignore errors if column already exists
-        for sql in MIGRATION_SQL:
-            try:
-                await d1.execute(sql)
-            except Exception:
-                pass
-
-        # Load secrets from D1 into config module globals
+        bg_pb = PBClient()
         try:
-            await load_config(d1)
-        except Exception as e:
-            print(f"WARNING: Failed to load config from D1: {e}")
-            print("Run: python backend/scripts/generate_secrets.py")
-
-        # Initial file sync (best-effort)
-        try:
-            await sync_files_from_drives(d1)
-        except Exception:
-            pass
-    finally:
-        await d1.aclose()
+            await sync_files_from_drives(bg_pb)
+        finally:
+            await bg_pb.aclose()
+    except Exception as e:
+        print(f"WARNING: Startup sync failed: {e}")
 
     yield
 
@@ -58,7 +42,10 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(accounts.router, prefix="/api")
 app.include_router(files.router, prefix="/api")
+app.include_router(folders.router, prefix="/api")
+app.include_router(shares.router, prefix="/api")
 app.include_router(profile_router.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 
 @app.get("/")

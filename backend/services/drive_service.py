@@ -16,9 +16,9 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 
 import config
-from models.models import DriveAccount, File
+from models.models import DriveAccount
 from services.auth_service import decrypt_token
-from services.d1_client import D1Client
+from services.pb_client import PBClient
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 PROFILE_FOLDER_NAME = "_GDriveGenie_"
@@ -39,7 +39,7 @@ def _retry_on_rate_limit(fn, *args, **kwargs):
 
 def build_service(account: DriveAccount):
     if not account.refresh_token:
-        raise ValueError(f"Account {account.account_index} is not connected (no refresh token)")
+        raise ValueError(f"Account {account.account_index} has no refresh token")
     refresh_token = decrypt_token(account.refresh_token)
     with open(CREDENTIALS_PATH) as f:
         client_config = json.load(f)
@@ -56,20 +56,18 @@ def build_service(account: DriveAccount):
 
 
 def get_oauth_flow(redirect_uri: str) -> Flow:
-    flow = Flow.from_client_secrets_file(CREDENTIALS_PATH, scopes=SCOPES, redirect_uri=redirect_uri)
-    return flow
+    return Flow.from_client_secrets_file(CREDENTIALS_PATH, scopes=SCOPES, redirect_uri=redirect_uri)
 
 
 def get_storage_quota(account: DriveAccount) -> dict:
     try:
         service = build_service(account)
-        result = _retry_on_rate_limit(
-            service.about().get(fields="storageQuota").execute
-        )
+        result = _retry_on_rate_limit(service.about().get(fields="storageQuota").execute)
         quota = result["storageQuota"]
         used = int(quota.get("usage", 0))
         limit = int(quota.get("limit", 15 * 1024 ** 3))
         return {
+            "id": account.id,
             "account_index": account.account_index,
             "email": account.email,
             "is_connected": account.is_connected,
@@ -79,44 +77,48 @@ def get_storage_quota(account: DriveAccount) -> dict:
         }
     except RefreshError:
         return {
+            "id": account.id,
             "account_index": account.account_index,
             "email": account.email,
             "is_connected": False,
-            "used": 0,
-            "limit": 0,
-            "free": 0,
+            "used": 0, "limit": 0, "free": 0,
         }
     except Exception:
         return {
+            "id": account.id,
             "account_index": account.account_index,
             "email": account.email,
             "is_connected": account.is_connected,
-            "used": 0,
-            "limit": 0,
-            "free": 0,
+            "used": 0, "limit": 0, "free": 0,
         }
 
 
-async def get_all_quotas(d1: D1Client) -> list[dict]:
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
-    accounts = [DriveAccount.from_row(r) for r in rows]
+async def get_all_quotas(pb: PBClient, user_id: str) -> list[dict]:
+    rows = await pb.list_records(
+        "gdrive_accounts",
+        filter=f'user="{user_id}" && is_connected=true',
+    )
+    accounts = [DriveAccount.from_pb(r) for r in rows]
     results = []
-    with ThreadPoolExecutor(max_workers=len(accounts) or 1) as executor:
+    with ThreadPoolExecutor(max_workers=max(1, len(accounts))) as executor:
         futures = {executor.submit(get_storage_quota, acc): acc for acc in accounts}
         for future in as_completed(futures):
             results.append(future.result())
     return sorted(results, key=lambda x: x["account_index"])
 
 
-async def pick_best_account(d1: D1Client) -> Optional[int]:
-    quotas = await get_all_quotas(d1)
+async def pick_best_account(pb: PBClient, user_id: str) -> Optional[str]:
+    """Return the PB account record ID with the most free space."""
+    quotas = await get_all_quotas(pb, user_id)
     connected = [q for q in quotas if q["is_connected"] and q["free"] > 0]
     if not connected:
         return None
-    return max(connected, key=lambda q: q["free"])["account_index"]
+    best = max(connected, key=lambda q: q["free"])
+    return best["id"]
 
 
-def upload_file(account: DriveAccount, file_stream: io.IOBase, filename: str, mime_type: str, parent_folder_id: str | None = None) -> dict:
+def upload_file(account: DriveAccount, file_stream: io.IOBase, filename: str,
+                mime_type: str, parent_folder_id: str | None = None) -> dict:
     service = build_service(account)
     media = MediaIoBaseUpload(file_stream, mimetype=mime_type, resumable=True)
     file_metadata: dict = {"name": filename}
@@ -135,16 +137,6 @@ def upload_file(account: DriveAccount, file_stream: io.IOBase, filename: str, mi
         "thumbnail_link": result.get("thumbnailLink"),
         "parent_drive_file_id": parent,
     }
-
-
-def get_file_metadata(account: DriveAccount, drive_file_id: str) -> dict:
-    service = build_service(account)
-    result = _retry_on_rate_limit(
-        service.files()
-        .get(fileId=drive_file_id, fields="id,name,size,mimeType,thumbnailLink,parents")
-        .execute
-    )
-    return result
 
 
 def download_file(account: DriveAccount, drive_file_id: str) -> bytes:
@@ -178,24 +170,21 @@ def stream_file(account: DriveAccount, drive_file_id: str):
 
 def rename_file(account: DriveAccount, drive_file_id: str, new_name: str) -> dict:
     service = build_service(account)
-    result = _retry_on_rate_limit(
+    return _retry_on_rate_limit(
         service.files()
-        .update(fileId=drive_file_id, body={"name": new_name}, fields="id,name,thumbnailLink")
+        .update(fileId=drive_file_id, body={"name": new_name}, fields="id,name")
         .execute
     )
-    return result
 
 
-def move_file(account: DriveAccount, drive_file_id: str, new_parent_id: str, old_parent_id: str | None = None) -> None:
+def move_file(account: DriveAccount, drive_file_id: str,
+              new_parent_id: str, old_parent_id: str | None = None) -> None:
     service = build_service(account)
-
     try:
         meta = service.files().get(fileId=drive_file_id, fields="id,parents").execute()
     except Exception:
         meta = {}
-
     current_parents = meta.get("parents", [])
-
     if current_parents:
         remove_parents = ",".join(current_parents)
     elif old_parent_id:
@@ -206,20 +195,15 @@ def move_file(account: DriveAccount, drive_file_id: str, new_parent_id: str, old
             remove_parents = root_meta.get("id")
         except Exception:
             remove_parents = None
-
     if remove_parents:
         _retry_on_rate_limit(
             service.files()
-            .update(
-                fileId=drive_file_id,
-                addParents=new_parent_id,
-                removeParents=remove_parents,
-                fields="id",
-            )
+            .update(fileId=drive_file_id, addParents=new_parent_id,
+                    removeParents=remove_parents, fields="id")
             .execute
         )
     else:
-        raise ValueError("Cannot determine current parent folder — file may be shared from another account and cannot be moved")
+        raise ValueError("Cannot determine current parent folder")
 
 
 def delete_drive_file(account: DriveAccount, drive_file_id: str) -> None:
@@ -231,6 +215,13 @@ def trash_drive_file(account: DriveAccount, drive_file_id: str) -> None:
     service = build_service(account)
     _retry_on_rate_limit(
         service.files().update(fileId=drive_file_id, body={"trashed": True}).execute
+    )
+
+
+def restore_file(account: DriveAccount, drive_file_id: str) -> None:
+    service = build_service(account)
+    _retry_on_rate_limit(
+        service.files().update(fileId=drive_file_id, body={"trashed": False}).execute
     )
 
 
@@ -251,6 +242,7 @@ def list_trash_files(account: DriveAccount) -> list[dict]:
             items.append({
                 "drive_file_id": f["id"],
                 "file_name": f.get("name", ""),
+                "account_id": account.id,
                 "account_index": account.account_index,
                 "size": int(f.get("size") or 0),
                 "mime_type": f.get("mimeType"),
@@ -262,21 +254,11 @@ def list_trash_files(account: DriveAccount) -> list[dict]:
     return items
 
 
-def restore_file(account: DriveAccount, drive_file_id: str) -> None:
-    service = build_service(account)
-    _retry_on_rate_limit(
-        service.files().update(fileId=drive_file_id, body={"trashed": False}).execute
-    )
-
-
 def share_file(account: DriveAccount, drive_file_id: str) -> str:
-    """Makes file readable by anyone with the link. Returns the shareable URL."""
     service = build_service(account)
     _retry_on_rate_limit(
         service.permissions().create(
-            fileId=drive_file_id,
-            body={"type": "anyone", "role": "reader"},
-            fields="id",
+            fileId=drive_file_id, body={"type": "anyone", "role": "reader"}, fields="id"
         ).execute
     )
     meta = _retry_on_rate_limit(
@@ -286,47 +268,17 @@ def share_file(account: DriveAccount, drive_file_id: str) -> str:
 
 
 def unshare_file(account: DriveAccount, drive_file_id: str) -> None:
-    """Removes public sharing (anyone with link) permission."""
     service = build_service(account)
     perms = _retry_on_rate_limit(
         service.permissions().list(fileId=drive_file_id, fields="permissions(id,type)").execute
     )
     anyone_id = next(
-        (p["id"] for p in perms.get("permissions", []) if p.get("type") == "anyone"),
-        None,
+        (p["id"] for p in perms.get("permissions", []) if p.get("type") == "anyone"), None
     )
     if anyone_id:
         _retry_on_rate_limit(
             service.permissions().delete(fileId=drive_file_id, permissionId=anyone_id).execute
         )
-
-
-def get_or_create_profile_folder(account: DriveAccount) -> str:
-    """Get the GDriveGenie internal folder ID, creating it if needed."""
-    service = build_service(account)
-    query = f"name='{PROFILE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
-    result = _retry_on_rate_limit(
-        service.files().list(q=query, fields="files(id)").execute
-    )
-    existing = result.get("files", [])
-    if existing:
-        return existing[0]["id"]
-    folder = _retry_on_rate_limit(
-        service.files()
-        .create(
-            body={"name": PROFILE_FOLDER_NAME, "mimeType": "application/vnd.google-apps.folder"},
-            fields="id",
-        )
-        .execute
-    )
-    return folder["id"]
-
-
-def _parse_drive_time(s: str | None):
-    from datetime import datetime
-    if not s:
-        return datetime.utcnow()
-    return datetime.fromisoformat(s.replace("Z", "+00:00")).replace(tzinfo=None)
 
 
 def list_shared_files(account: DriveAccount) -> list[dict]:
@@ -347,6 +299,7 @@ def list_shared_files(account: DriveAccount) -> list[dict]:
             items.append({
                 "drive_file_id": f["id"],
                 "file_name": f.get("name", ""),
+                "account_id": account.id,
                 "account_index": account.account_index,
                 "size": int(f.get("size") or 0),
                 "mime_type": f.get("mimeType"),
@@ -361,42 +314,31 @@ def list_shared_files(account: DriveAccount) -> list[dict]:
 
 def remove_shared_file(account: DriveAccount, drive_file_id: str) -> None:
     service = build_service(account)
-
     try:
         _retry_on_rate_limit(service.files().delete(fileId=drive_file_id).execute)
-        logger.info("remove_shared_file: deleted file %s (owner)", drive_file_id)
         return
     except HttpError as e:
-        logger.info("remove_shared_file: files.delete gave %s for %s, trying fallbacks", e.resp.status, drive_file_id)
         if e.resp.status not in (403, 404):
             raise
-
     try:
         _retry_on_rate_limit(
             service.files().update(fileId=drive_file_id, body={"trashed": True}).execute
         )
-        logger.info("remove_shared_file: trashed file %s", drive_file_id)
         return
     except HttpError as e:
-        logger.info("remove_shared_file: files.update(trashed) gave %s for %s", e.resp.status, drive_file_id)
         if e.resp.status not in (403,):
             raise
-
     try:
         about = _retry_on_rate_limit(service.about().get(fields="user(permissionId)").execute)
         user_perm_id = about["user"]["permissionId"]
         _retry_on_rate_limit(
             service.permissions().delete(fileId=drive_file_id, permissionId=user_perm_id).execute
         )
-        logger.info("remove_shared_file: removed own permission %s from %s", user_perm_id, drive_file_id)
-        return
     except HttpError as e:
         if e.resp.status == 404:
             raise ValueError(
-                "This file is shared via link — Google Drive's API does not allow removing "
-                "link-shared files from 'Shared with me'. Use the Google Drive web app to remove it."
+                "This file is shared via link — use Google Drive to remove it."
             )
-        logger.exception("remove_shared_file: all fallbacks failed for %s", drive_file_id)
         raise
 
 
@@ -430,6 +372,28 @@ def list_shared_folder_children(account: DriveAccount, folder_id: str) -> list[d
     return sorted(items, key=lambda x: (x["mime_type"] != "application/vnd.google-apps.folder", x["file_name"].lower()))
 
 
+def get_or_create_profile_folder(account: DriveAccount) -> str:
+    service = build_service(account)
+    query = f"name='{PROFILE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+    result = _retry_on_rate_limit(service.files().list(q=query, fields="files(id)").execute)
+    existing = result.get("files", [])
+    if existing:
+        return existing[0]["id"]
+    folder = _retry_on_rate_limit(
+        service.files()
+        .create(body={"name": PROFILE_FOLDER_NAME, "mimeType": "application/vnd.google-apps.folder"}, fields="id")
+        .execute
+    )
+    return folder["id"]
+
+
+def _parse_drive_time(s: str | None):
+    from datetime import datetime
+    if not s:
+        return datetime.utcnow()
+    return datetime.fromisoformat(s.replace("Z", "+00:00")).replace(tzinfo=None)
+
+
 def list_all_files(account: DriveAccount) -> list[dict]:
     service = build_service(account)
     items = []
@@ -450,80 +414,64 @@ def list_all_files(account: DriveAccount) -> list[dict]:
     return items
 
 
-async def sync_files_from_drives(d1: D1Client) -> int:
-    account_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
-    accounts = [DriveAccount.from_row(r) for r in account_rows]
+async def sync_files_from_drives(pb: PBClient, user_id: str | None = None) -> int:
+    """
+    Sync Google Drive files into gdrive_files collection.
+    If user_id is given, sync only that user's accounts.
+    Otherwise sync all users.
+    """
+    filter_str = f'user="{user_id}" && is_connected=true' if user_id else "is_connected=true"
+    account_rows = await pb.list_records("gdrive_accounts", filter=filter_str)
     total = 0
-    CHUNK = 50  # stay well within SQLite variable limit and D1 batch limit
 
-    for account in accounts:
+    for acc_row in account_rows:
+        account = DriveAccount.from_pb(acc_row)
+        u_id = account.user_id
         try:
             drive_files = list_all_files(account)
             drive_ids = {df["id"] for df in drive_files}
 
-            # Fetch existing drive_file_ids for this account
-            existing_rows = await d1.execute(
-                "SELECT drive_file_id FROM files WHERE account_index = ?",
-                [account.account_index],
+            # Existing file IDs for this account in PocketBase
+            existing = await pb.list_records(
+                "gdrive_files",
+                filter=f'user="{u_id}" && account="{account.id}"',
+                per_page=2000,
             )
-            existing_ids = {r["drive_file_id"] for r in existing_rows}
+            existing_map = {r["drive_file_id"]: r["id"] for r in existing}
+            existing_drive_ids = set(existing_map.keys())
 
-            # Delete stale records in small chunks (avoids SQLite variable limit)
-            stale_ids = list(existing_ids - drive_ids)
-            for i in range(0, len(stale_ids), CHUNK):
-                chunk = stale_ids[i:i + CHUNK]
-                placeholders = ",".join("?" * len(chunk))
-                await d1.execute(
-                    f"DELETE FROM files WHERE account_index = ? AND drive_file_id IN ({placeholders})",
-                    [account.account_index, *chunk],
-                )
+            # Delete stale
+            stale = existing_drive_ids - drive_ids
+            for drive_file_id in stale:
+                pb_id = existing_map[drive_file_id]
+                try:
+                    await pb.delete_record("gdrive_files", pb_id)
+                except Exception:
+                    pass
 
-            # Build insert and update batches
-            inserts = []
-            updates = []
+            # Upsert
             for df in drive_files:
                 parent = df.get("parents", [None])[0] if df.get("parents") else None
-                if df["id"] not in existing_ids:
-                    inserts.append({
-                        "sql": (
-                            "INSERT OR IGNORE INTO files "
-                            "(file_name, drive_file_id, account_index, size, mime_type, "
-                            "thumbnail_link, parent_drive_file_id, created_at) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-                        ),
-                        "params": [
-                            df.get("name", ""),
-                            df["id"],
-                            account.account_index,
-                            int(df.get("size") or 0),
-                            df.get("mimeType"),
-                            df.get("thumbnailLink"),
-                            parent,
-                            _parse_drive_time(df.get("createdTime")).isoformat(),
-                        ],
-                    })
-                else:
-                    updates.append({
-                        "sql": (
-                            "UPDATE files SET file_name = ?, size = ?, thumbnail_link = ?, "
-                            "parent_drive_file_id = ? WHERE drive_file_id = ? AND account_index = ?"
-                        ),
-                        "params": [
-                            df.get("name", ""),
-                            int(df.get("size") or 0),
-                            df.get("thumbnailLink"),
-                            parent,
-                            df["id"],
-                            account.account_index,
-                        ],
-                    })
-                total += 1
-
-            # Execute in chunks to stay within D1 batch limits
-            for i in range(0, len(inserts), CHUNK):
-                await d1.execute_many(inserts[i:i + CHUNK])
-            for i in range(0, len(updates), CHUNK):
-                await d1.execute_many(updates[i:i + CHUNK])
+                drive_id = df["id"]
+                payload = {
+                    "user": u_id,
+                    "account": account.id,
+                    "file_name": df.get("name", ""),
+                    "drive_file_id": drive_id,
+                    "size": int(df.get("size") or 0),
+                    "mime_type": df.get("mimeType"),
+                    "thumbnail_link": df.get("thumbnailLink"),
+                    "parent_drive_file_id": parent,
+                    "drive_created_at": _parse_drive_time(df.get("createdTime")).isoformat(),
+                }
+                try:
+                    if drive_id in existing_map:
+                        await pb.update_record("gdrive_files", existing_map[drive_id], payload)
+                    else:
+                        await pb.create_record("gdrive_files", payload)
+                    total += 1
+                except Exception:
+                    pass
 
         except Exception:
             pass  # per-account isolation

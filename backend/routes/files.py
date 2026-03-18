@@ -4,15 +4,12 @@ import logging
 import mimetypes
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, UploadFile, status
-
-logger = logging.getLogger(__name__)
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from database import get_d1
+from database import PBClient, get_pb
 from models.models import DriveAccount, File
 from services.auth_service import verify_token
-from services.d1_client import D1Client
 from services.drive_service import (
     delete_drive_file,
     stream_file,
@@ -31,6 +28,7 @@ from services.drive_service import (
     upload_file,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/files", tags=["files"])
 
 
@@ -47,37 +45,53 @@ def _file_to_dict(f: File, account_email: str | None = None) -> dict:
         "id": f.id,
         "file_name": f.file_name,
         "drive_file_id": f.drive_file_id,
+        "account_id": f.account_id,
         "account_index": f.account_index,
         "account_email": account_email,
         "size": f.size,
         "mime_type": f.mime_type,
         "has_thumbnail": f.thumbnail_link is not None,
         "parent_drive_file_id": f.parent_drive_file_id,
-        "created_at": f.created_at,  # already a string from D1
+        "created_at": f.drive_created_at,
     }
 
 
-async def _get_file_and_account(file_id: int, d1: D1Client):
-    rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
-    if not rows:
+async def _get_file_and_account(file_id: str, user_id: str, pb: PBClient):
+    """Fetch file + account, enforcing user ownership."""
+    try:
+        row = await pb.get_record("gdrive_files", file_id)
+    except Exception:
         raise HTTPException(status_code=404, detail="File not found")
-    file = File.from_row(rows[0])
-    acc_rows = await d1.execute(
-        "SELECT * FROM drive_accounts WHERE account_index = ?", [file.account_index]
+    if row.get("user") != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    account_id = row.get("account", "")
+    acc_rows = await pb.list_records(
+        "gdrive_accounts", filter=f'id="{account_id}"', per_page=1
     )
-    account = DriveAccount.from_row(acc_rows[0]) if acc_rows else None
+    if not acc_rows:
+        raise HTTPException(status_code=404, detail="Account not found")
+    acc_row = acc_rows[0]
+    account = DriveAccount.from_pb(acc_row)
+    file = File.from_pb(row, account_index=account.account_index)
     return file, account
 
 
 @router.post("/sync")
-async def sync_files(background_tasks: BackgroundTasks, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    async def _sync_bg() -> None:
-        from services.d1_client import D1Client as _D1Client
-        bg_d1 = _D1Client()
+async def sync_files(
+    background_tasks: BackgroundTasks,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+
+    async def _sync_bg():
+        from services.pb_client import PBClient as _PB
+        bg_pb = _PB()
         try:
-            await sync_files_from_drives(bg_d1)
+            await sync_files_from_drives(bg_pb, user_id)
         finally:
-            await bg_d1.aclose()
+            await bg_pb.aclose()
 
     background_tasks.add_task(asyncio.run, _sync_bg())
     return {"ok": True}
@@ -86,105 +100,148 @@ async def sync_files(background_tasks: BackgroundTasks, d1: D1Client = Depends(g
 @router.get("/search")
 async def search_files(
     q: str = "",
-    account_index: int | None = None,
+    account_id: str | None = None,
     mime_type: str | None = None,
-    d1: D1Client = Depends(get_d1),
-    _=Depends(verify_token),
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
 ):
-    acc_rows = await d1.execute("SELECT account_index, email FROM drive_accounts WHERE is_connected = 1")
-    connected_indices = [r["account_index"] for r in acc_rows]
-    email_map = {r["account_index"]: r.get("email") for r in acc_rows}
-    if not connected_indices:
-        return []
-
-    placeholders = ",".join("?" * len(connected_indices))
-    conditions = [f"account_index IN ({placeholders})"]
-    params: list = list(connected_indices)
-
+    user_id = token["sub"]
+    conditions = [f'user="{user_id}"']
     if q:
-        conditions.append("LOWER(file_name) LIKE LOWER(?)")
-        params.append(f"%{q}%")
-    if account_index is not None and account_index in connected_indices:
-        conditions.append("account_index = ?")
-        params.append(account_index)
+        # PocketBase filter: case-insensitive contains
+        conditions.append(f'file_name~"{q}"')
+    if account_id:
+        conditions.append(f'account="{account_id}"')
     if mime_type:
-        conditions.append("mime_type LIKE ?")
-        params.append(f"%{mime_type}%")
+        conditions.append(f'mime_type~"{mime_type}"')
 
-    where = " AND ".join(conditions)
-    rows = await d1.execute(
-        f"SELECT * FROM files WHERE {where} ORDER BY created_at DESC LIMIT 500",
-        params,
+    filter_str = " && ".join(conditions)
+    rows = await pb.list_records(
+        "gdrive_files", filter=filter_str, sort="-drive_created_at", per_page=500
     )
-    return [_file_to_dict(File.from_row(r), email_map.get(r["account_index"])) for r in rows]
+
+    # Build account index map
+    acc_rows = await pb.list_records(
+        "gdrive_accounts", filter=f'user="{user_id}" && is_connected=true'
+    )
+    acc_map = {r["id"]: r for r in acc_rows}
+
+    result = []
+    for row in rows:
+        acc_row = acc_map.get(row.get("account", ""), {})
+        account = DriveAccount.from_pb(acc_row) if acc_row else None
+        f = File.from_pb(row, account_index=account.account_index if account else 0)
+        result.append(_file_to_dict(f, acc_row.get("email") if acc_row else None))
+    return result
 
 
 @router.get("")
-async def list_files(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    acc_rows = await d1.execute("SELECT account_index, email FROM drive_accounts WHERE is_connected = 1")
-    connected_indices = [r["account_index"] for r in acc_rows]
-    email_map = {r["account_index"]: r.get("email") for r in acc_rows}
-    if not connected_indices:
-        return []
-    placeholders = ",".join("?" * len(connected_indices))
-    file_rows = await d1.execute(
-        f"SELECT * FROM files WHERE account_index IN ({placeholders}) ORDER BY created_at DESC",
-        connected_indices,
+async def list_files(
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    rows = await pb.list_records(
+        "gdrive_files",
+        filter=f'user="{user_id}"',
+        sort="-drive_created_at",
+        per_page=2000,
     )
-    return [_file_to_dict(File.from_row(r), email_map.get(r["account_index"])) for r in file_rows]
+    acc_rows = await pb.list_records(
+        "gdrive_accounts", filter=f'user="{user_id}" && is_connected=true'
+    )
+    acc_map = {r["id"]: r for r in acc_rows}
+
+    result = []
+    for row in rows:
+        acc_row = acc_map.get(row.get("account", ""), {})
+        account = DriveAccount.from_pb(acc_row) if acc_row else None
+        f = File.from_pb(row, account_index=account.account_index if account else 0)
+        result.append(_file_to_dict(f, acc_row.get("email") if acc_row else None))
+    return result
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload(
     file: UploadFile,
-    parent_folder_id: str | None = Form(None),
-    d1: D1Client = Depends(get_d1),
-    _=Depends(verify_token),
+    parent_folder_id: str | None = Form(None),    # virtual folder PB id (optional)
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
 ):
-    best_index = await pick_best_account(d1)
-    if best_index is None:
+    user_id = token["sub"]
+    storage_limit = token.get("storage_limit_bytes", 16106127360)
+
+    # Check user's storage
+    user_rec = await pb.get_record("gdrive_users", user_id)
+    used = int(user_rec.get("storage_used_bytes") or 0)
+    limit = int(user_rec.get("storage_limit_bytes") or storage_limit)
+
+    best_acc_id = await pick_best_account(pb, user_id)
+    if best_acc_id is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="No connected Drive accounts with available space",
         )
 
-    acc_rows = await d1.execute(
-        "SELECT * FROM drive_accounts WHERE account_index = ?", [best_index]
-    )
-    if not acc_rows:
-        raise HTTPException(status_code=503, detail="Account not found")
-    account = DriveAccount.from_row(acc_rows[0])
+    acc_row = await pb.get_record("gdrive_accounts", best_acc_id)
+    account = DriveAccount.from_pb(acc_row)
 
-    mime_type = file.content_type or mimetypes.guess_type(file.filename)[0] or "application/octet-stream"
+    mime_type = file.content_type or mimetypes.guess_type(file.filename or "")[0] or "application/octet-stream"
     content = await file.read()
-    stream = io.BytesIO(content)
+    file_size = len(content)
 
-    result = upload_file(account, stream, file.filename, mime_type, parent_folder_id or None)
+    if used + file_size > limit:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Storage limit reached ({limit // (1024**3)} GB). Contact admin to increase your quota.",
+        )
 
-    await d1.execute(
-        "INSERT INTO files (file_name, drive_file_id, account_index, size, mime_type, "
-        "thumbnail_link, parent_drive_file_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-            file.filename,
-            result["drive_file_id"],
-            best_index,
-            result["size"],
-            result["mime_type"],
-            result.get("thumbnail_link"),
-            result.get("parent_drive_file_id"),
-        ],
-    )
-    id_rows = await d1.execute("SELECT last_insert_rowid() AS id")
-    new_id = id_rows[0]["id"]
+    result = upload_file(account, io.BytesIO(content), file.filename, mime_type)
 
-    new_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [new_id])
-    return _file_to_dict(File.from_row(new_rows[0]))
+    new_file = await pb.create_record("gdrive_files", {
+        "user": user_id,
+        "account": best_acc_id,
+        "file_name": file.filename,
+        "drive_file_id": result["drive_file_id"],
+        "size": result["size"],
+        "mime_type": result["mime_type"],
+        "thumbnail_link": result.get("thumbnail_link"),
+        "parent_drive_file_id": result.get("parent_drive_file_id"),
+    })
+
+    # Update storage_used_bytes
+    try:
+        await pb.update_record("gdrive_users", user_id, {
+            "storage_used_bytes": used + result["size"],
+        })
+    except Exception:
+        pass
+
+    # If a virtual folder was specified, add the mapping
+    if parent_folder_id:
+        try:
+            # Verify folder belongs to this user
+            folder_rec = await pb.get_record("gdrive_folders", parent_folder_id)
+            if folder_rec.get("user") == user_id:
+                await pb.create_record("gdrive_folder_files", {
+                    "folder": parent_folder_id,
+                    "file": new_file["id"],
+                })
+        except Exception:
+            pass
+
+    f = File.from_pb(new_file, account_index=account.account_index)
+    return _file_to_dict(f, account.email)
 
 
 @router.get("/{file_id}/download")
-async def get_download(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account or not account.is_connected:
+async def get_download(
+    file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     return StreamingResponse(
         stream_file(account, file.drive_file_id),
@@ -194,9 +251,13 @@ async def get_download(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(v
 
 
 @router.get("/{file_id}/view")
-async def get_view(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account or not account.is_connected:
+async def get_view(
+    file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     return StreamingResponse(
         stream_file(account, file.drive_file_id),
@@ -207,83 +268,151 @@ async def get_view(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verif
 
 @router.patch("/{file_id}/rename")
 async def rename(
-    file_id: int,
+    file_id: str,
     body: RenameRequest,
-    d1: D1Client = Depends(get_d1),
-    _=Depends(verify_token),
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
 ):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
     rename_file(account, file.drive_file_id, body.new_name)
-    await d1.execute("UPDATE files SET file_name = ? WHERE id = ?", [body.new_name, file_id])
-    updated_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
-    return _file_to_dict(File.from_row(updated_rows[0]))
+    updated = await pb.update_record("gdrive_files", file_id, {"file_name": body.new_name})
+    f = File.from_pb(updated, account_index=account.account_index)
+    return _file_to_dict(f, account.email)
 
 
 @router.patch("/{file_id}/move")
 async def move_file_route(
-    file_id: int,
+    file_id: str,
     body: MoveRequest,
-    d1: D1Client = Depends(get_d1),
-    _=Depends(verify_token),
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
 ):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
     try:
         move_file(account, file.drive_file_id, body.new_parent_drive_file_id, file.parent_drive_file_id)
     except Exception as e:
         logger.exception("move_file failed for file_id=%s", file_id)
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e))
     new_parent = None if body.new_parent_drive_file_id == "root" else body.new_parent_drive_file_id
-    await d1.execute("UPDATE files SET parent_drive_file_id = ? WHERE id = ?", [new_parent, file_id])
-    updated_rows = await d1.execute("SELECT * FROM files WHERE id = ?", [file_id])
-    return _file_to_dict(File.from_row(updated_rows[0]))
+    updated = await pb.update_record("gdrive_files", file_id, {"parent_drive_file_id": new_parent})
+    f = File.from_pb(updated, account_index=account.account_index)
+    return _file_to_dict(f, account.email)
 
 
 @router.post("/{file_id}/share")
-async def share_file_route(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account or not account.is_connected:
+async def share_file_route(
+    file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         link = share_file(account, file.drive_file_id)
         return {"link": link}
     except Exception as e:
-        logger.exception("share_file failed for file_id=%s", file_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{file_id}/share", status_code=status.HTTP_204_NO_CONTENT)
-async def unshare_file_route(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    file, account = await _get_file_and_account(file_id, d1)
-    if not account or not account.is_connected:
+async def unshare_file_route(
+    file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    file, account = await _get_file_and_account(file_id, token["sub"], pb)
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         unshare_file(account, file.drive_file_id)
     except Exception as e:
-        logger.exception("unshare_file failed for file_id=%s", file_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_file(file_id: int, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    file, account = await _get_file_and_account(file_id, d1)
-    if account and account.is_connected:
+async def delete_file(
+    file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    file, account = await _get_file_and_account(file_id, user_id, pb)
+    if account.is_connected:
         try:
             trash_drive_file(account, file.drive_file_id)
         except Exception:
             pass
-    await d1.execute("DELETE FROM files WHERE id = ?", [file_id])
+
+    # Update storage
+    try:
+        user_rec = await pb.get_record("gdrive_users", user_id)
+        used = int(user_rec.get("storage_used_bytes") or 0)
+        new_used = max(0, used - file.size)
+        await pb.update_record("gdrive_users", user_id, {"storage_used_bytes": new_used})
+    except Exception:
+        pass
+
+    # Remove folder mappings
+    try:
+        mappings = await pb.list_records("gdrive_folder_files", filter=f'file="{file_id}"')
+        for m in mappings:
+            await pb.delete_record("gdrive_folder_files", m["id"])
+    except Exception:
+        pass
+
+    await pb.delete_record("gdrive_files", file_id)
 
 
-@router.get("/shared/{account_index}/{drive_file_id}/download")
-async def download_shared_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
-    if not rows:
+# ---------------------------------------------------------------------------
+# Shared files (Google Drive "Shared with me")
+# ---------------------------------------------------------------------------
+
+@router.get("/shared")
+async def list_shared(pb: PBClient = Depends(get_pb), token: dict = Depends(verify_token)):
+    user_id = token["sub"]
+    acc_rows = await pb.list_records(
+        "gdrive_accounts", filter=f'user="{user_id}" && is_connected=true'
+    )
+    results = []
+    for row in acc_rows:
+        try:
+            results.extend(list_shared_files(DriveAccount.from_pb(row)))
+        except Exception:
+            pass
+    return sorted(results, key=lambda x: x.get("created_at", ""), reverse=True)
+
+
+@router.get("/shared/{account_id}/{folder_id}/children")
+async def list_shared_children(
+    account_id: str, folder_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_row = await pb.get_record("gdrive_accounts", account_id)
+    if acc_row.get("user") != user_id:
+        raise HTTPException(status_code=403)
+    account = DriveAccount.from_pb(acc_row)
+    if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
-    account = DriveAccount.from_row(rows[0])
+    try:
+        return list_shared_folder_children(account, folder_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/shared/{account_id}/{drive_file_id}/download")
+async def download_shared_file(
+    account_id: str, drive_file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_row = await pb.get_record("gdrive_accounts", account_id)
+    if acc_row.get("user") != user_id:
+        raise HTTPException(status_code=403)
+    account = DriveAccount.from_pb(acc_row)
     if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     return StreamingResponse(
@@ -293,85 +422,73 @@ async def download_shared_file(account_index: int, drive_file_id: str, d1: D1Cli
     )
 
 
-@router.get("/shared/{account_index}/{folder_id}/children")
-async def list_shared_children(account_index: int, folder_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
-    if not rows:
-        raise HTTPException(status_code=503, detail="Account not connected")
-    account = DriveAccount.from_row(rows[0])
-    if not account.is_connected:
-        raise HTTPException(status_code=503, detail="Account not connected")
-    try:
-        return list_shared_folder_children(account, folder_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/shared/{account_index}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_shared_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
-    if not rows:
-        raise HTTPException(status_code=503, detail="Account not connected")
-    account = DriveAccount.from_row(rows[0])
+@router.delete("/shared/{account_id}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_shared_file(
+    account_id: str, drive_file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_row = await pb.get_record("gdrive_accounts", account_id)
+    if acc_row.get("user") != user_id:
+        raise HTTPException(status_code=403)
+    account = DriveAccount.from_pb(acc_row)
     if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not connected")
     try:
         remove_shared_file(account, drive_file_id)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/shared")
-async def list_shared(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    acc_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
-    accounts = [DriveAccount.from_row(r) for r in acc_rows]
-    results = []
-    for account in accounts:
-        try:
-            results.extend(list_shared_files(account))
-        except Exception:
-            pass
-    return sorted(results, key=lambda x: x.get("created_at", ""), reverse=True)
-
+# ---------------------------------------------------------------------------
+# Trash
+# ---------------------------------------------------------------------------
 
 @router.get("/trash")
-async def list_trash(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    acc_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
-    accounts = [DriveAccount.from_row(r) for r in acc_rows]
+async def list_trash(pb: PBClient = Depends(get_pb), token: dict = Depends(verify_token)):
+    user_id = token["sub"]
+    acc_rows = await pb.list_records(
+        "gdrive_accounts", filter=f'user="{user_id}" && is_connected=true'
+    )
     results = []
-    for account in accounts:
+    for row in acc_rows:
         try:
-            results.extend(list_trash_files(account))
+            results.extend(list_trash_files(DriveAccount.from_pb(row)))
         except Exception:
             pass
     return sorted(results, key=lambda x: x.get("trashed_at", ""), reverse=True)
 
 
-@router.post("/trash/{account_index}/{drive_file_id}/restore", status_code=status.HTTP_204_NO_CONTENT)
-async def restore_trash_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
-    if not rows:
-        raise HTTPException(status_code=503, detail="Account not connected")
-    account = DriveAccount.from_row(rows[0])
-    if not account.is_connected:
-        raise HTTPException(status_code=503, detail="Account not connected")
+@router.post("/trash/{account_id}/{drive_file_id}/restore", status_code=status.HTTP_204_NO_CONTENT)
+async def restore_trash_file(
+    account_id: str, drive_file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_row = await pb.get_record("gdrive_accounts", account_id)
+    if acc_row.get("user") != user_id:
+        raise HTTPException(status_code=403)
     try:
-        restore_file(account, drive_file_id)
+        restore_file(DriveAccount.from_pb(acc_row), drive_file_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/trash/{account_index}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_trash_file(account_index: int, drive_file_id: str, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM drive_accounts WHERE account_index = ?", [account_index])
-    if not rows:
-        raise HTTPException(status_code=503, detail="Account not connected")
-    account = DriveAccount.from_row(rows[0])
-    if not account.is_connected:
-        raise HTTPException(status_code=503, detail="Account not connected")
+@router.delete("/trash/{account_id}/{drive_file_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_trash_file(
+    account_id: str, drive_file_id: str,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_row = await pb.get_record("gdrive_accounts", account_id)
+    if acc_row.get("user") != user_id:
+        raise HTTPException(status_code=403)
     try:
-        delete_drive_file(account, drive_file_id)
+        delete_drive_file(DriveAccount.from_pb(acc_row), drive_file_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

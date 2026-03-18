@@ -2,35 +2,50 @@ services:
 
   backend:
     build:
-      context: .                # repo root — backend Dockerfile uses COPY backend/
+      context: .
       dockerfile: backend/Dockerfile
     ports:
       - "8000:8000"
     environment:
-      # Allow browser requests from the frontend origin
       FRONTEND_URL: http://localhost:3000
-      # Public URL the browser can reach — used to build the OAuth callback URI
       BACKEND_URL: http://localhost:8000
-      # Point config.py at the bind-mounted credentials directory
       CONFIG_DIR: /app/config
-      # Cloudflare D1 credentials — set these in a .env file or host environment
-      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
-      CF_D1_DATABASE_ID: ${CF_D1_DATABASE_ID}
-      CF_API_TOKEN: ${CF_API_TOKEN}
+      # PocketBase — point to your hosted instance
+      PB_URL: ${PB_URL:-https://data.genericxinus.com}
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
+      # Secrets — generate with: python backend/scripts/setup_pocketbase.py
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
     volumes:
-      # Google OAuth credentials — place credentials.json here before starting
       - ./config:/app/config:ro
     restart: unless-stopped
 
   frontend:
     build:
-      context: ./frontend       # build context is the frontend/ folder
+      context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Server-side Next.js rewrites resolve via the Docker network service name
         NEXT_PUBLIC_API_URL: http://backend:8000
     ports:
       - "3000:3000"
     depends_on:
       - backend
+    restart: unless-stopped
+
+  webdav:
+    build:
+      context: .
+      dockerfile: webdav/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      PB_URL: ${PB_URL:-https://data.genericxinus.com}
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      CREDENTIALS_PATH: /app/config/credentials.json
+      WEBDAV_PORT: "8080"
+    volumes:
+      - ./config:/app/config:ro
     restart: unless-stopped

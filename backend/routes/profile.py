@@ -5,10 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from database import get_d1
-from models.models import DriveAccount, Profile
+from database import PBClient, get_pb
+from models.models import DriveAccount, GDUser
 from services.auth_service import verify_token
-from services.d1_client import D1Client
 from services.drive_service import download_file, get_or_create_profile_folder, upload_file
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -19,47 +18,52 @@ class ProfileUpdate(BaseModel):
     bio: str | None = None
 
 
-async def _get_or_create_profile(d1: D1Client) -> Profile:
-    rows = await d1.execute("SELECT * FROM profile LIMIT 1")
-    if rows:
-        return Profile.from_row(rows[0])
-    await d1.execute("INSERT INTO profile (display_name, bio) VALUES (NULL, NULL)")
-    rows = await d1.execute("SELECT * FROM profile LIMIT 1")
-    return Profile.from_row(rows[0])
-
-
 @router.get("")
-async def get_profile(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    profile = await _get_or_create_profile(d1)
+async def get_profile(pb: PBClient = Depends(get_pb), token: dict = Depends(verify_token)):
+    user_id = token["sub"]
+    record = await pb.get_record("gdrive_users", user_id)
+    user = GDUser.from_pb(record)
     return {
-        "display_name": profile.display_name,
-        "bio": profile.bio,
-        "has_avatar": profile.avatar_drive_file_id is not None,
+        "display_name": user.display_name,
+        "bio": user.bio,
+        "has_avatar": bool(user.avatar_drive_file_id),
+        "storage_limit_bytes": user.storage_limit_bytes,
+        "storage_used_bytes": user.storage_used_bytes,
     }
 
 
 @router.put("")
-async def update_profile(body: ProfileUpdate, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    profile = await _get_or_create_profile(d1)
-    parts, params = [], []
+async def update_profile(
+    body: ProfileUpdate,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    updates: dict = {}
     if body.display_name is not None:
-        parts.append("display_name = ?")
-        params.append(body.display_name)
+        updates["display_name"] = body.display_name
     if body.bio is not None:
-        parts.append("bio = ?")
-        params.append(body.bio)
-    if parts:
-        params.append(profile.id)
-        await d1.execute(f"UPDATE profile SET {', '.join(parts)} WHERE id = ?", params)
+        updates["bio"] = body.bio
+    if updates:
+        await pb.update_record("gdrive_users", user_id, updates)
     return {"ok": True}
 
 
 @router.post("/avatar", status_code=status.HTTP_200_OK)
-async def upload_avatar(file: UploadFile, d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    acc_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1 LIMIT 1")
+async def upload_avatar(
+    file: UploadFile,
+    pb: PBClient = Depends(get_pb),
+    token: dict = Depends(verify_token),
+):
+    user_id = token["sub"]
+    acc_rows = await pb.list_records(
+        "gdrive_accounts",
+        filter=f'user="{user_id}" && is_connected=true',
+        per_page=1,
+    )
     if not acc_rows:
         raise HTTPException(status_code=503, detail="No connected accounts")
-    account = DriveAccount.from_row(acc_rows[0])
+    account = DriveAccount.from_pb(acc_rows[0])
 
     mime_type = file.content_type or mimetypes.guess_type(file.filename or "")[0] or "image/jpeg"
     content = await file.read()
@@ -67,31 +71,25 @@ async def upload_avatar(file: UploadFile, d1: D1Client = Depends(get_d1), _=Depe
     folder_id = get_or_create_profile_folder(account)
     result = upload_file(account, io.BytesIO(content), "_gdriveGenie_avatar_", mime_type, parent_folder_id=folder_id)
 
-    profile = await _get_or_create_profile(d1)
-    await d1.execute(
-        "UPDATE profile SET avatar_drive_file_id = ?, avatar_account_index = ? WHERE id = ?",
-        [result["drive_file_id"], account.account_index, profile.id],
-    )
+    await pb.update_record("gdrive_users", user_id, {
+        "avatar_drive_file_id": result["drive_file_id"],
+        "avatar_account_id": acc_rows[0]["id"],
+    })
     return {"ok": True}
 
 
 @router.get("/avatar")
-async def get_avatar(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    rows = await d1.execute("SELECT * FROM profile LIMIT 1")
-    if not rows:
-        raise HTTPException(status_code=404, detail="No avatar set")
-    profile = Profile.from_row(rows[0])
-    if not profile.avatar_drive_file_id:
+async def get_avatar(pb: PBClient = Depends(get_pb), token: dict = Depends(verify_token)):
+    user_id = token["sub"]
+    record = await pb.get_record("gdrive_users", user_id)
+    user = GDUser.from_pb(record)
+    if not user.avatar_drive_file_id:
         raise HTTPException(status_code=404, detail="No avatar set")
 
-    acc_rows = await d1.execute(
-        "SELECT * FROM drive_accounts WHERE account_index = ?", [profile.avatar_account_index]
-    )
-    if not acc_rows:
-        raise HTTPException(status_code=503, detail="Account not available")
-    account = DriveAccount.from_row(acc_rows[0])
+    acc_row = await pb.get_record("gdrive_accounts", user.avatar_account_id)
+    account = DriveAccount.from_pb(acc_row)
     if not account.is_connected:
         raise HTTPException(status_code=503, detail="Account not available")
 
-    content = download_file(account, profile.avatar_drive_file_id)
+    content = download_file(account, user.avatar_drive_file_id)
     return StreamingResponse(io.BytesIO(content), media_type="image/jpeg")
