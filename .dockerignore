@@ -1,0 +1,32 @@
+# Keep the backend Docker build context small (context is repo root)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+.git/
+.github/
+deploy/
+nginx/
+*.md
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local database
+backend/drivepool.db
+backend/*.db
+
+# Secrets
+.env
+.env.*
+backend/.env
+backend/.env.*
+config/credentials*.json
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

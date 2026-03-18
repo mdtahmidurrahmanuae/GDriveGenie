@@ -2,8 +2,8 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       FRONTEND_URL: http://${SERVER_IP}
       BACKEND_URL: http://${SERVER_IP}
