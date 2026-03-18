@@ -8,9 +8,11 @@ services:
       FRONTEND_URL: https://gdrive.genericxinus.com
       BACKEND_URL: https://gdrive.genericxinus.com
       CONFIG_DIR: /app/config
-      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
-      CF_D1_DATABASE_ID: ${CF_D1_DATABASE_ID}
-      CF_API_TOKEN: ${CF_API_TOKEN}
+      PB_URL: ${PB_URL}
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
     volumes:
       - ./config:/app/config:ro
     restart: unless-stopped
