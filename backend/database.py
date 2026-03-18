@@ -45,4 +45,5 @@ CREATE_TABLES_SQL = [
 # Idempotent migrations — errors are swallowed in main.py if column already exists
 MIGRATION_SQL = [
     "ALTER TABLE files ADD COLUMN parent_drive_file_id TEXT",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_files_drive_id_account ON files(drive_file_id, account_index)",
 ]

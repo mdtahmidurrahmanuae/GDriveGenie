@@ -454,23 +454,12 @@ async def sync_files_from_drives(d1: D1Client) -> int:
     account_rows = await d1.execute("SELECT * FROM drive_accounts WHERE is_connected = 1")
     accounts = [DriveAccount.from_row(r) for r in account_rows]
     total = 0
+    CHUNK = 50  # stay well within SQLite variable limit and D1 batch limit
+
     for account in accounts:
         try:
             drive_files = list_all_files(account)
             drive_ids = {df["id"] for df in drive_files}
-
-            # Delete stale local records that no longer exist on Drive
-            if drive_ids:
-                placeholders = ",".join("?" * len(drive_ids))
-                await d1.execute(
-                    f"DELETE FROM files WHERE account_index = ? AND drive_file_id NOT IN ({placeholders})",
-                    [account.account_index, *drive_ids],
-                )
-            else:
-                await d1.execute(
-                    "DELETE FROM files WHERE account_index = ?",
-                    [account.account_index],
-                )
 
             # Fetch existing drive_file_ids for this account
             existing_rows = await d1.execute(
@@ -479,13 +468,25 @@ async def sync_files_from_drives(d1: D1Client) -> int:
             )
             existing_ids = {r["drive_file_id"] for r in existing_rows}
 
+            # Delete stale records in small chunks (avoids SQLite variable limit)
+            stale_ids = list(existing_ids - drive_ids)
+            for i in range(0, len(stale_ids), CHUNK):
+                chunk = stale_ids[i:i + CHUNK]
+                placeholders = ",".join("?" * len(chunk))
+                await d1.execute(
+                    f"DELETE FROM files WHERE account_index = ? AND drive_file_id IN ({placeholders})",
+                    [account.account_index, *chunk],
+                )
+
+            # Build insert and update batches
             inserts = []
+            updates = []
             for df in drive_files:
                 parent = df.get("parents", [None])[0] if df.get("parents") else None
                 if df["id"] not in existing_ids:
                     inserts.append({
                         "sql": (
-                            "INSERT INTO files "
+                            "INSERT OR IGNORE INTO files "
                             "(file_name, drive_file_id, account_index, size, mime_type, "
                             "thumbnail_link, parent_drive_file_id, created_at) "
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -502,10 +503,12 @@ async def sync_files_from_drives(d1: D1Client) -> int:
                         ],
                     })
                 else:
-                    await d1.execute(
-                        "UPDATE files SET file_name = ?, size = ?, thumbnail_link = ?, "
-                        "parent_drive_file_id = ? WHERE drive_file_id = ? AND account_index = ?",
-                        [
+                    updates.append({
+                        "sql": (
+                            "UPDATE files SET file_name = ?, size = ?, thumbnail_link = ?, "
+                            "parent_drive_file_id = ? WHERE drive_file_id = ? AND account_index = ?"
+                        ),
+                        "params": [
                             df.get("name", ""),
                             int(df.get("size") or 0),
                             df.get("thumbnailLink"),
@@ -513,11 +516,14 @@ async def sync_files_from_drives(d1: D1Client) -> int:
                             df["id"],
                             account.account_index,
                         ],
-                    )
+                    })
                 total += 1
 
-            if inserts:
-                await d1.execute_many(inserts)
+            # Execute in chunks to stay within D1 batch limits
+            for i in range(0, len(inserts), CHUNK):
+                await d1.execute_many(inserts[i:i + CHUNK])
+            for i in range(0, len(updates), CHUNK):
+                await d1.execute_many(updates[i:i + CHUNK])
 
         except Exception:
             pass  # per-account isolation
