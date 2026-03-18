@@ -7,6 +7,7 @@ export type FileItem = {
   file_name: string;
   drive_file_id: string;
   account_index: number;
+  account_email: string | null;
   size: number;
   mime_type: string | null;
   has_thumbnail: boolean;

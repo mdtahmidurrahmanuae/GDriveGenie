@@ -42,12 +42,13 @@ class MoveRequest(BaseModel):
     new_parent_drive_file_id: str
 
 
-def _file_to_dict(f: File) -> dict:
+def _file_to_dict(f: File, account_email: str | None = None) -> dict:
     return {
         "id": f.id,
         "file_name": f.file_name,
         "drive_file_id": f.drive_file_id,
         "account_index": f.account_index,
+        "account_email": account_email,
         "size": f.size,
         "mime_type": f.mime_type,
         "has_thumbnail": f.thumbnail_link is not None,
@@ -82,10 +83,47 @@ async def sync_files(background_tasks: BackgroundTasks, d1: D1Client = Depends(g
     return {"ok": True}
 
 
+@router.get("/search")
+async def search_files(
+    q: str = "",
+    account_index: int | None = None,
+    mime_type: str | None = None,
+    d1: D1Client = Depends(get_d1),
+    _=Depends(verify_token),
+):
+    acc_rows = await d1.execute("SELECT account_index, email FROM drive_accounts WHERE is_connected = 1")
+    connected_indices = [r["account_index"] for r in acc_rows]
+    email_map = {r["account_index"]: r.get("email") for r in acc_rows}
+    if not connected_indices:
+        return []
+
+    placeholders = ",".join("?" * len(connected_indices))
+    conditions = [f"account_index IN ({placeholders})"]
+    params: list = list(connected_indices)
+
+    if q:
+        conditions.append("LOWER(file_name) LIKE LOWER(?)")
+        params.append(f"%{q}%")
+    if account_index is not None and account_index in connected_indices:
+        conditions.append("account_index = ?")
+        params.append(account_index)
+    if mime_type:
+        conditions.append("mime_type LIKE ?")
+        params.append(f"%{mime_type}%")
+
+    where = " AND ".join(conditions)
+    rows = await d1.execute(
+        f"SELECT * FROM files WHERE {where} ORDER BY created_at DESC LIMIT 500",
+        params,
+    )
+    return [_file_to_dict(File.from_row(r), email_map.get(r["account_index"])) for r in rows]
+
+
 @router.get("")
 async def list_files(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
-    acc_rows = await d1.execute("SELECT account_index FROM drive_accounts WHERE is_connected = 1")
+    acc_rows = await d1.execute("SELECT account_index, email FROM drive_accounts WHERE is_connected = 1")
     connected_indices = [r["account_index"] for r in acc_rows]
+    email_map = {r["account_index"]: r.get("email") for r in acc_rows}
     if not connected_indices:
         return []
     placeholders = ",".join("?" * len(connected_indices))
@@ -93,7 +131,7 @@ async def list_files(d1: D1Client = Depends(get_d1), _=Depends(verify_token)):
         f"SELECT * FROM files WHERE account_index IN ({placeholders}) ORDER BY created_at DESC",
         connected_indices,
     )
-    return [_file_to_dict(File.from_row(r)) for r in file_rows]
+    return [_file_to_dict(File.from_row(r), email_map.get(r["account_index"])) for r in file_rows]
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)

@@ -270,7 +270,7 @@ function PreviewModal({ file, onClose }: { file: FileItem; onClose: () => void }
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
             <p className="truncate text-sm font-medium text-gg-text">{file.file_name}</p>
-            <span className="flex-shrink-0 rounded-md border border-gg-border px-1.5 py-0.5 text-[10px] text-gg-text3">#{file.account_index}</span>
+            <span className="flex-shrink-0 rounded-md border border-gg-border px-1.5 py-0.5 text-[10px] text-gg-text3" title={file.account_email ?? undefined}>{file.account_email ? file.account_email.split("@")[0] : `#${file.account_index}`}</span>
           </div>
           <div className="flex items-center gap-2">
             {!isGoogleWorkspace && (
@@ -544,8 +544,8 @@ function GridCard({
         onClick={() => isFolder ? onOpen(file) : undefined}
       >
         <FileTypeIcon mimeType={file.mime_type} size={44} />
-        <span className="absolute right-2 top-2 rounded-full border border-gg-border bg-gg-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-gg-text3">
-          #{file.account_index}
+        <span className="absolute right-2 top-2 rounded-full border border-gg-border bg-gg-s1/90 px-1.5 py-0.5 text-[9px] font-semibold text-gg-text3" title={file.account_email ?? undefined}>
+          {file.account_email ? file.account_email.split("@")[0] : `#${file.account_index}`}
         </span>
       </div>
 
@@ -701,7 +701,7 @@ function ListRow({
       </td>
       <td className="hidden px-4 py-3 text-sm text-gg-text3 sm:table-cell">{isFolder ? "—" : formatBytes(file.size)}</td>
       <td className="hidden px-4 py-3 md:table-cell">
-        <span className="rounded-md border border-gg-border px-2 py-0.5 text-xs text-gg-text3">#{file.account_index}</span>
+        <span className="rounded-md border border-gg-border px-2 py-0.5 text-xs text-gg-text3" title={file.account_email ?? undefined}>{file.account_email ? file.account_email.split("@")[0] : `#${file.account_index}`}</span>
       </td>
       <td className="hidden px-4 py-3 text-sm text-gg-text3 md:table-cell">{new Date(file.created_at).toLocaleDateString()}</td>
       <td className="px-4 py-3">
