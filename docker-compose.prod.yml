@@ -29,10 +29,21 @@ services:
 
   nginx:
     image: nginx:alpine
-    ports:
-      - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - frontend
     restart: unless-stopped
+    networks:
+      - default
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gdrivegenie.rule=Host(`${SERVER_IP}`)"
+      - "traefik.http.routers.gdrivegenie.entrypoints=web"
+      - "traefik.http.services.gdrivegenie.loadbalancer.server.port=80"
+      - "traefik.docker.network=dokploy-network"
+
+networks:
+  dokploy-network:
+    external: true
